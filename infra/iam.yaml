@@ -1,0 +1,179 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Witness — IAM execution roles for Lambda functions (least-privilege)"
+
+Resources:
+
+  # ── 1. Session Lambda role ──────────────────────────────────────────────────
+  WitnessSessionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: witness-session-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: witness-session-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # CloudWatch Logs — session_id and status codes only (enforced in Lambda code)
+              - Sid: AllowCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/witness-session:*"
+              # Cognito Identity — create anonymous sessions
+              - Sid: AllowCognitoAnonymousSession
+                Effect: Allow
+                Action:
+                  - cognito-identity:GetId
+                  - cognito-identity:GetOpenIdToken
+                Resource: !Sub "arn:aws:cognito-identity:${AWS::Region}:${AWS::AccountId}:identitypool/*"
+
+  # ── 2. Process Lambda role ──────────────────────────────────────────────────
+  WitnessProcessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: witness-process-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: witness-process-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/witness-process:*"
+              # Bedrock — scoped to Claude Sonnet only
+              - Sid: AllowBedrockClaudeSonnet
+                Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+              # KMS — encrypt/decrypt for Bedrock response handling
+              - Sid: AllowKmsForProcess
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                  - kms:DescribeKey
+                Resource: !ImportValue WitnessKmsKeyArn
+
+  # ── 3. Save Lambda role ─────────────────────────────────────────────────────
+  WitnessSaveRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: witness-save-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: witness-save-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/witness-save:*"
+              # DynamoDB — write only, scoped to witness-reports table
+              - Sid: AllowDynamoDBPutItem
+                Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !ImportValue WitnessTableArn
+              # KMS — needed to write KMS-encrypted DynamoDB items
+              - Sid: AllowKmsForSave
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                  - kms:DescribeKey
+                Resource: !ImportValue WitnessKmsKeyArn
+
+  # ── 4. Retrieve Lambda role ─────────────────────────────────────────────────
+  WitnessRetrieveRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: witness-retrieve-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: witness-retrieve-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/witness-retrieve:*"
+              # DynamoDB — read only, scoped to witness-reports table
+              - Sid: AllowDynamoDBGetItem
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !ImportValue WitnessTableArn
+              # KMS — needed to decrypt KMS-encrypted DynamoDB items
+              - Sid: AllowKmsForRetrieve
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                Resource: !ImportValue WitnessKmsKeyArn
+
+Outputs:
+
+  WitnessSessionRoleArn:
+    Description: ARN of the session Lambda execution role
+    Value: !GetAtt WitnessSessionRole.Arn
+    Export:
+      Name: WitnessSessionRoleArn
+
+  WitnessProcessRoleArn:
+    Description: ARN of the process Lambda execution role
+    Value: !GetAtt WitnessProcessRole.Arn
+    Export:
+      Name: WitnessProcessRoleArn
+
+  WitnessSaveRoleArn:
+    Description: ARN of the save Lambda execution role
+    Value: !GetAtt WitnessSaveRole.Arn
+    Export:
+      Name: WitnessSaveRoleArn
+
+  WitnessRetrieveRoleArn:
+    Description: ARN of the retrieve Lambda execution role
+    Value: !GetAtt WitnessRetrieveRole.Arn
+    Export:
+      Name: WitnessRetrieveRoleArn

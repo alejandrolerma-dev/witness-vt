@@ -1,0 +1,312 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Witness — API Gateway REST API with CORS
+
+Parameters:
+  VercelOrigin:
+    Type: String
+    Default: "https://witness.vercel.app"
+    Description: Allowed CORS origin (Vercel frontend URL)
+
+  StageName:
+    Type: String
+    Default: prod
+    Description: API Gateway stage name
+
+  SessionLambdaArn:
+    Type: String
+    Default: ""
+    Description: ARN of the session Lambda function
+
+  ProcessLambdaArn:
+    Type: String
+    Default: ""
+    Description: ARN of the process Lambda function
+
+  SaveLambdaArn:
+    Type: String
+    Default: ""
+    Description: ARN of the save Lambda function
+
+  RetrieveLambdaArn:
+    Type: String
+    Default: ""
+    Description: ARN of the retrieve Lambda function
+
+Resources:
+
+  # ── REST API ──────────────────────────────────────────────────────────────
+  WitnessApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: witness-api
+      Description: Witness bias incident reporting API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # ── /session ─────────────────────────────────────────────────────────────
+  SessionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ParentId: !GetAtt WitnessApi.RootResourceId
+      PathPart: session
+
+  SessionPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref SessionResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SessionLambdaArn}/invocations"
+
+  SessionOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref SessionResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${VercelOrigin}'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+
+  # ── /report ───────────────────────────────────────────────────────────────
+  ReportResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ParentId: !GetAtt WitnessApi.RootResourceId
+      PathPart: report
+
+  # ── /report/process ───────────────────────────────────────────────────────
+  ProcessResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ParentId: !Ref ReportResource
+      PathPart: process
+
+  ProcessPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref ProcessResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProcessLambdaArn}/invocations"
+
+  ProcessOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref ProcessResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${VercelOrigin}'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+
+  # ── /report/save ──────────────────────────────────────────────────────────
+  SaveResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ParentId: !Ref ReportResource
+      PathPart: save
+
+  SavePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref SaveResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SaveLambdaArn}/invocations"
+
+  SaveOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref SaveResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${VercelOrigin}'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+
+  # ── /report/{session_id} ──────────────────────────────────────────────────
+  ReportByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ParentId: !Ref ReportResource
+      PathPart: "{session_id}"
+
+  RetrieveGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref ReportByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RetrieveLambdaArn}/invocations"
+
+  RetrieveOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref WitnessApi
+      ResourceId: !Ref ReportByIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: "200"
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${VercelOrigin}'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: "200"
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+
+  # ── Deployment & Stage ────────────────────────────────────────────────────
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - SessionPost
+      - SessionOptions
+      - ProcessPost
+      - ProcessOptions
+      - SavePost
+      - SaveOptions
+      - RetrieveGet
+      - RetrieveOptions
+    Properties:
+      RestApiId: !Ref WitnessApi
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref WitnessApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref StageName
+
+  # ── Lambda Permissions ────────────────────────────────────────────────────
+  SessionLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SessionLambdaArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WitnessApi}/*/*/session"
+
+  ProcessLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ProcessLambdaArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WitnessApi}/*/*/report/process"
+
+  SaveLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SaveLambdaArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WitnessApi}/*/*/report/save"
+
+  RetrieveLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RetrieveLambdaArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WitnessApi}/*/*/report/*"
+
+# ── Outputs ───────────────────────────────────────────────────────────────
+Outputs:
+  WitnessApiId:
+    Description: REST API ID
+    Value: !Ref WitnessApi
+    Export:
+      Name: WitnessApiId
+
+  WitnessApiUrl:
+    Description: API invoke URL
+    Value: !Sub "https://${WitnessApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+    Export:
+      Name: WitnessApiUrl
+
+  WitnessApiArn:
+    Description: ARN pattern for Cognito unauthenticated role (POST /session only)
+    Value: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WitnessApi}/*/POST/session"
+    Export:
+      Name: WitnessApiArn

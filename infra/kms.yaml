@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Witness — KMS Customer Managed Key for DynamoDB encryption"
+
+Parameters:
+  LambdaRoleArns:
+    Type: CommaDelimitedList
+    Default: ""
+    Description: >
+      Comma-delimited list of Lambda execution role ARNs allowed to use the key
+      for encrypt/decrypt. Update after Task 5 creates the roles.
+
+Resources:
+
+  WitnessKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "Witness — CMK for DynamoDB encryption"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+
+          # 1. Account root — full key administration (required by KMS)
+          - Sid: AllowRootAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+          # 2. Lambda execution roles — least-privilege encrypt/decrypt
+          - Sid: AllowLambdaRoles
+            Effect: Allow
+            Principal:
+              AWS: !Ref LambdaRoleArns
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+              - kms:DescribeKey
+            Resource: "*"
+
+          # 3. DynamoDB service principal — key usage for table encryption
+          - Sid: AllowDynamoDBService
+            Effect: Allow
+            Principal:
+              Service: dynamodb.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+              - kms:DescribeKey
+              - kms:CreateGrant
+            Resource: "*"
+            Condition:
+              StringEquals:
+                "kms:CallerAccount": !Ref AWS::AccountId
+
+          # 4. Explicit deny — all other principals for data-plane operations
+          - Sid: DenyAllOtherPrincipals
+            Effect: Deny
+            Principal: "*"
+            Action:
+              - kms:Decrypt
+              - kms:Encrypt
+              - kms:GenerateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+              - kms:ReEncrypt*
+            Resource: "*"
+            Condition:
+              ArnNotLike:
+                "aws:PrincipalArn":
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+                  - "arn:aws:iam::*:role/*"
+              StringNotEquals:
+                "aws:PrincipalServiceName": dynamodb.amazonaws.com
+
+  WitnessKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/witness-cmk
+      TargetKeyId: !Ref WitnessKmsKey
+
+Outputs:
+
+  WitnessKmsKeyArn:
+    Description: ARN of the Witness KMS CMK
+    Value: !GetAtt WitnessKmsKey.Arn
+    Export:
+      Name: WitnessKmsKeyArn
+
+  WitnessKmsKeyId:
+    Description: Key ID of the Witness KMS CMK
+    Value: !Ref WitnessKmsKey
+    Export:
+      Name: WitnessKmsKeyId
+
+  WitnessKmsAliasArn:
+    Description: ARN of the Witness KMS alias
+    Value: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:${WitnessKmsAlias}"
+    Export:
+      Name: WitnessKmsAliasArn

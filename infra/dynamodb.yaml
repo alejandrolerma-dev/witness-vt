@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Witness — DynamoDB table for bias incident reports (Task 2)"
+
+Parameters:
+  KmsKeyArn:
+    Type: String
+    Description: ARN of the KMS CMK used to encrypt the DynamoDB table
+    Default: "{{resolve:ssm:/witness/kms-key-arn}}"
+    # Override with: --parameter-overrides KmsKeyArn=$(aws cloudformation list-exports --query "Exports[?Name=='WitnessKmsKeyArn'].Value" --output text)
+
+Resources:
+  WitnessReportsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: witness-reports
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: session_id
+          AttributeType: S
+        - AttributeName: saved_at
+          AttributeType: S
+      KeySchema:
+        - AttributeName: session_id
+          KeyType: HASH
+        - AttributeName: saved_at
+          KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref KmsKeyArn
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Project
+          Value: witness
+        - Key: Security
+          Value: no-pii
+
+Outputs:
+  WitnessTableName:
+    Description: DynamoDB table name
+    Value: !Ref WitnessReportsTable
+    Export:
+      Name: WitnessTableName
+
+  WitnessTableArn:
+    Description: DynamoDB table ARN
+    Value: !GetAtt WitnessReportsTable.Arn
+    Export:
+      Name: WitnessTableArn
