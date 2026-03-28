@@ -117,46 +117,108 @@ function TrendChart({ data, labelKey, valueKey, color = '#6366f1' }) {
   );
 }
 
-// --- Campus Heatmap ---
-function CampusHeatmap({ locations }) {
-  const physicalLocations = locations.filter(l => l.lat && l.lng);
-  if (physicalLocations.length === 0) return null;
+// --- Campus Heatmap with VT campus map ---
 
-  const maxCount = Math.max(...physicalLocations.map(l => l.count), 1);
+// VT campus buildings — positioned on the SVG map
+const CAMPUS_BUILDINGS = [
+  { name: 'Burruss', x: 125, y: 115, w: 28, h: 16 },
+  { name: 'Torgersen', x: 150, y: 68, w: 30, h: 14 },
+  { name: 'Newman Library', x: 210, y: 82, w: 34, h: 16 },
+  { name: 'Goodwin', x: 235, y: 120, w: 26, h: 14 },
+  { name: 'McBryde', x: 80, y: 95, w: 28, h: 14 },
+  { name: 'Squires', x: 160, y: 158, w: 28, h: 14 },
+  { name: 'War Memorial', x: 135, y: 48, w: 30, h: 12 },
+  { name: 'Norris', x: 90, y: 135, w: 24, h: 12 },
+  { name: 'Dietrick', x: 200, y: 160, w: 26, h: 12 },
+  { name: 'Owens', x: 240, y: 155, w: 22, h: 12 },
+  { name: 'Residence Halls', x: 260, y: 55, w: 36, h: 14 },
+];
 
-  // Normalize lat/lng to SVG coordinates (VT campus bounding box)
-  const minLat = 37.2260, maxLat = 37.2330;
-  const minLng = -80.4280, maxLng = -80.4150;
+// Map building names to SVG positions for heatmap overlay
+const LOCATION_TO_POS = {
+  'torgersen hall':         { x: 165, y: 72 },
+  'torgersen':              { x: 165, y: 72 },
+  'newman library':         { x: 227, y: 88 },
+  'newman':                 { x: 227, y: 88 },
+  'squires student center': { x: 174, y: 163 },
+  'squires':                { x: 174, y: 163 },
+  'goodwin hall':           { x: 248, y: 125 },
+  'goodwin':                { x: 248, y: 125 },
+  'mcbryde hall':           { x: 94, y: 100 },
+  'mcbryde':                { x: 94, y: 100 },
+  'drill field':            { x: 160, y: 115 },
+  'dietrick':               { x: 213, y: 164 },
+  'd2':                     { x: 213, y: 164 },
+  'owens':                  { x: 251, y: 159 },
+  'burruss':                { x: 139, y: 121 },
+  'norris':                 { x: 102, y: 139 },
+  'residence halls':        { x: 278, y: 60 },
+  'war memorial':           { x: 150, y: 52 },
+};
 
-  function toSvg(lat, lng) {
-    const x = 20 + ((lng - minLng) / (maxLng - minLng)) * 280;
-    const y = 20 + ((maxLat - lat) / (maxLat - minLat)) * 180;
-    return { x, y };
+function matchPosition(locStr) {
+  if (!locStr) return null;
+  const lower = locStr.toLowerCase();
+  for (const [name, pos] of Object.entries(LOCATION_TO_POS)) {
+    if (lower.includes(name)) return pos;
   }
+  return null;
+}
+
+function CampusHeatmap({ locations }) {
+  const mapped = locations
+    .map(l => ({ ...l, pos: matchPosition(l.location) }))
+    .filter(l => l.pos);
+
+  if (mapped.length === 0) return null;
+
+  const maxCount = Math.max(...mapped.map(l => l.count), 1);
 
   return (
     <div className="flex flex-col gap-3">
-      <svg viewBox="0 0 320 220" className="w-full rounded-2xl bg-slate-50 border border-slate-200">
-        {/* Campus outline (simplified) */}
-        <rect x="10" y="10" width="300" height="200" rx="12" fill="#f8fafc" stroke="#e2e8f0" />
-        <text x="160" y="30" textAnchor="middle" className="fill-slate-300" style={{ fontSize: 10, fontWeight: 600 }}>
+      <svg viewBox="0 0 320 220" className="w-full rounded-2xl overflow-hidden" style={{ background: '#e8f0e4' }}>
+        {/* Roads */}
+        <line x1="0" y1="110" x2="320" y2="110" stroke="#d4d4d4" strokeWidth="4" opacity="0.6" />
+        <line x1="160" y1="0" x2="160" y2="220" stroke="#d4d4d4" strokeWidth="3" opacity="0.5" />
+        <line x1="60" y1="0" x2="100" y2="220" stroke="#d4d4d4" strokeWidth="2.5" opacity="0.4" />
+        <line x1="260" y1="0" x2="240" y2="220" stroke="#d4d4d4" strokeWidth="2.5" opacity="0.4" />
+        <line x1="0" y1="55" x2="320" y2="55" stroke="#d4d4d4" strokeWidth="2" opacity="0.3" />
+        <line x1="0" y1="165" x2="320" y2="165" stroke="#d4d4d4" strokeWidth="2" opacity="0.3" />
+
+        {/* Drill Field — large oval green space */}
+        <ellipse cx="160" cy="115" rx="50" ry="30" fill="#c8dcc0" stroke="#a3c49a" strokeWidth="1.5" />
+        <text x="160" y="118" textAnchor="middle" style={{ fontSize: 7, fontWeight: 600, fill: '#6b8f63' }}>
+          Drill Field
+        </text>
+
+        {/* Buildings */}
+        {CAMPUS_BUILDINGS.map(b => (
+          <g key={b.name}>
+            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="2" fill="#c4b5a0" stroke="#a89880" strokeWidth="0.8" opacity="0.7" />
+            <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 3} textAnchor="middle" style={{ fontSize: 5, fontWeight: 600, fill: '#5c4f3d' }}>
+              {b.name}
+            </text>
+          </g>
+        ))}
+
+        {/* Campus label */}
+        <text x="160" y="14" textAnchor="middle" style={{ fontSize: 9, fontWeight: 700, fill: '#64748b', letterSpacing: '1px' }}>
           VIRGINIA TECH CAMPUS
         </text>
 
         {/* Heatmap dots */}
-        {physicalLocations.map((loc) => {
-          const { x, y } = toSvg(loc.lat, loc.lng);
+        {mapped.map((loc) => {
           const intensity = loc.count / maxCount;
-          const r = 12 + intensity * 25;
-          const opacity = 0.15 + intensity * 0.35;
+          const r = 10 + intensity * 22;
+          const opacity = 0.2 + intensity * 0.35;
           return (
             <g key={loc.location}>
-              <circle cx={x} cy={y} r={r} fill="#ef4444" opacity={opacity} />
-              <circle cx={x} cy={y} r={5} fill="#ef4444" opacity={0.8} />
-              <text x={x} y={y - r - 4} textAnchor="middle" className="fill-slate-600" style={{ fontSize: 8, fontWeight: 600 }}>
+              <circle cx={loc.pos.x} cy={loc.pos.y} r={r} fill="#ef4444" opacity={opacity} />
+              <circle cx={loc.pos.x} cy={loc.pos.y} r={4.5} fill="#ef4444" opacity={0.85} stroke="white" strokeWidth="1" />
+              <text x={loc.pos.x} y={loc.pos.y - r - 3} textAnchor="middle" style={{ fontSize: 7, fontWeight: 700, fill: '#1e293b' }}>
                 {loc.location}
               </text>
-              <text x={x} y={y + 3} textAnchor="middle" style={{ fontSize: 7, fontWeight: 700, fill: 'white' }}>
+              <text x={loc.pos.x} y={loc.pos.y + 3} textAnchor="middle" style={{ fontSize: 6, fontWeight: 700, fill: 'white' }}>
                 {loc.count}
               </text>
             </g>
