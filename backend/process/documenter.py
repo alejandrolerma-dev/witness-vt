@@ -39,6 +39,12 @@ SYSTEM_PROMPT = (
     "- Remove or replace any names, email addresses, VT IDs, phone numbers, or other identifying information with \"[REDACTED]\".\n"
     "- Do not include any PII in your output.\n"
     "- Be factual and neutral. Do not editorialize.\n"
+    "- For description_summary: write a 1-3 sentence neutral summary using ONLY what the student explicitly described. Do not add context, assumptions, or details not present in the text.\n"
+    "- For severity_indicator, use these criteria strictly:\n"
+    "  * high: explicit physical threat, physical assault, or repeated targeted harassment described\n"
+    "  * medium: verbal bias incident, discriminatory remarks, or single hostile interaction\n"
+    "  * low: ambiguous situation, microaggression, or uncertain if bias-motivated\n"
+    "  * Default to medium if unclear — do NOT default to high.\n"
     "- Output only valid JSON matching the schema below. No prose, no markdown."
 )
 

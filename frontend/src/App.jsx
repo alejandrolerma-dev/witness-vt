@@ -93,7 +93,10 @@ export default function App() {
       return (
         <ReviewDocumenterScreen
           incidentRecord={reportData?.incident_record}
-          onContinue={() => setScreen('review_advisor')}
+          onContinue={(editedRecord) => {
+            setReportData(prev => ({ ...prev, incident_record: editedRecord }));
+            setScreen('review_advisor');
+          }}
           onBack={() => setScreen('describe')}
           onExit={handleExit}
         />

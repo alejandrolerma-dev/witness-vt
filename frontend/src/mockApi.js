@@ -14,18 +14,21 @@ export async function createSession() {
 
 export async function processIncident(rawText, structuredFields) {
   await delay(1500);
-  // Use structured fields if provided, otherwise fall back to "Not specified"
   const dateContext = structuredFields?.when || 'Not specified';
   const locationContext = structuredFields?.where || 'Not specified';
+  // Derive a real summary from what the user typed (first 200 chars, trimmed)
+  const trimmed = rawText.trim();
+  const summary = trimmed.length > 180
+    ? trimmed.slice(0, 180).replace(/\s+\S*$/, '') + '…'
+    : trimmed;
   return {
     incident_record: {
       incident_type: "verbal",
       date_context: dateContext,
       location_context: locationContext,
       bias_category: "race",
-      description_summary:
-        "A student reported being subjected to racially charged remarks during a study group session. The remarks were directed at the student and made in front of peers.",
-      severity_indicator: "high",
+      description_summary: summary,
+      severity_indicator: "medium",
     },
     advice: {
       matched_policy: "Bias Response Team",
