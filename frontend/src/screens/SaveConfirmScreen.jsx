@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useI18n } from '../i18n';
 
 export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -23,13 +25,13 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
           </svg>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Report saved</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('report_saved')}</h1>
           <p className="text-white/50 text-sm leading-relaxed">
             Use this token to retrieve your report later.
           </p>
         </div>
         <div className="w-full bg-white rounded-3xl shadow-card p-5 flex flex-col gap-3">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Your retrieval token</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{t('retrieval_token')}</p>
           <div className="bg-slate-50 rounded-2xl px-4 py-3 font-mono text-sm text-slate-700 break-all border border-slate-100">
             {retrievalToken}
           </div>
@@ -37,12 +39,12 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
             onClick={handleCopy}
             className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${copied ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
-            {copied ? '✓ Copied!' : 'Copy token'}
+            {copied ? t('copied') : t('copy_token')}
           </button>
 
           {/* QR Code — encodes a full URL so scanning opens the app with the token */}
           <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-100">
-            <p className="text-xs text-slate-400">Or scan this QR code to retrieve later</p>
+            <p className="text-xs text-slate-400">{t('qr_screenshot')}</p>
             <div className="bg-white p-3 rounded-2xl border border-slate-100">
               <QRCodeSVG
                 value={`${window.location.origin}?token=${encodeURIComponent(retrievalToken)}`}
@@ -52,7 +54,6 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
                 fgColor="#1a1f36"
               />
             </div>
-            <p className="text-xs text-slate-300">Scanning opens Witness with your token pre-filled</p>
           </div>
 
           <p className="text-xs text-slate-400 text-center">No personal information was stored.</p>
@@ -61,7 +62,7 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 8v4l3 3"/>
             </svg>
-            <p className="text-xs text-amber-700">This report will auto-delete after <strong>90 days</strong>. Save your token to retrieve it before then.</p>
+            <p className="text-xs text-amber-700">{t('auto_delete')}</p>
           </div>
         </div>
         <div className="w-full flex flex-col gap-3">
@@ -70,13 +71,13 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
             className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
           >
-            Return to home
+            {t('return_home')}
           </button>
           <button
             onClick={onDone}
             className="w-full py-3 rounded-2xl text-sm font-semibold text-white/50 hover:text-white/70 border border-white/10 hover:border-white/20 transition-all"
           >
-            Exit
+            {t('exit')}
           </button>
         </div>
       </div>

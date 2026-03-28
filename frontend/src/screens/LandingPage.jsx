@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ExitButton from '../components/ExitButton';
 import { getStats } from '../api';
-import { useI18n, LanguageSwitcher } from '../i18n';
+import { useI18n } from '../i18n';
 
 /* ─── Keyframe styles injected once ─────────────────────────────────── */
 const STYLES = `
@@ -161,36 +161,7 @@ export default function LandingPage({ onStart, onExit, onRetrieve, onDashboard, 
           }} />
         </div>
 
-        {/* ── Language switcher + Exit button ── */}
-        <div className="relative z-10">
-          <div className="absolute top-4 left-4">
-            <LanguageSwitcher />
-          </div>
-          <div className="absolute top-4 right-4">
-            <button
-              onClick={onExit}
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full border transition-all"
-              style={{
-                background: 'rgba(239,68,68,0.08)',
-                borderColor: 'rgba(239,68,68,0.2)',
-                color: 'rgba(252,165,165,0.8)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(239,68,68,0.18)';
-                e.currentTarget.style.color = '#fca5a5';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
-                e.currentTarget.style.color = 'rgba(252,165,165,0.8)';
-              }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-              {t('leave_safely')}
-            </button>
-          </div>
-        </div>
+        {/* ── (no top bar on landing) ── */}
 
         {/* ── Main content ── */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 py-16">

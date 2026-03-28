@@ -1,12 +1,21 @@
 import ExitButton from '../components/ExitButton';
+import { useI18n } from '../i18n';
 
 const agents = [
-  { label: 'Documenter', desc: 'Structuring your incident record' },
-  { label: 'Advisor', desc: 'Identifying your rights under VT policy' },
-  { label: 'Navigator', desc: 'Building your reporting path' },
+  { label: 'Documenter', descKey: 'agent_documenter' },
+  { label: 'Advisor', descKey: 'agent_advisor' },
+  { label: 'Navigator', descKey: 'agent_navigator' },
 ];
 
+const AGENT_DESC_FALLBACK = {
+  agent_documenter: 'Structuring your incident record',
+  agent_advisor: 'Identifying your rights under VT policy',
+  agent_navigator: 'Building your reporting path',
+};
+
 export default function ProcessingScreen({ onExit }) {
+  const { t } = useI18n();
+
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5"
@@ -31,26 +40,26 @@ export default function ProcessingScreen({ onExit }) {
 
         {/* Text */}
         <div className="text-center">
-          <h2 className="text-xl font-bold text-white mb-2">Analyzing your report</h2>
-          <p className="text-white/40 text-sm">Our AI agents are working — this takes about 15 seconds</p>
+          <h2 className="text-xl font-bold text-white mb-2">{t('analyzing')}</h2>
+          <p className="text-white/40 text-sm">{t('analyzing_desc')}</p>
         </div>
 
         {/* Agent progress */}
         <div className="w-full bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
-          {agents.map(({ label, desc }, i) => (
+          {agents.map(({ label, descKey }, i) => (
             <div key={label} className={`flex items-center gap-3.5 px-5 py-4 ${i < agents.length - 1 ? 'border-b border-white/5' : ''}`}>
               <div className="w-7 h-7 rounded-full border-2 border-brand/40 border-t-brand animate-spin flex-shrink-0"
                 style={{ animationDelay: `${i * 0.3}s`, animationDuration: '1.2s' }} />
               <div>
                 <p className="text-white/80 text-xs font-semibold">{label}</p>
-                <p className="text-white/30 text-xs">{desc}</p>
+                <p className="text-white/30 text-xs">{t(descKey) !== descKey ? t(descKey) : AGENT_DESC_FALLBACK[descKey]}</p>
               </div>
             </div>
           ))}
         </div>
 
         <p className="text-white/20 text-xs text-center">
-          Your identity is protected throughout this process
+          {t('identity_protected')}
         </p>
       </div>
     </div>

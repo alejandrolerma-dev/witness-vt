@@ -1,4 +1,8 @@
+import { useI18n } from '../i18n';
+
 export default function ExitScreen() {
+  const { t } = useI18n();
+
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5"
@@ -13,12 +17,12 @@ export default function ExitScreen() {
           </svg>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">You've left safely</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('left_safely')}</h1>
           <p className="text-white/50 text-sm leading-relaxed">
-            All session data has been cleared from this device. Nothing was stored.
+            {t('session_cleared')}
           </p>
         </div>
-        <p className="text-white/25 text-xs">You can close this tab.</p>
+        <p className="text-white/25 text-xs">{t('close_tab')}</p>
       </div>
     </div>
   );
