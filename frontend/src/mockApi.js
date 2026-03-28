@@ -15,7 +15,7 @@ export async function createSession() {
 // --- NLP helpers ---
 
 const INCIDENT_SIGNALS = {
-  physical:  [/assault/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /grab/, /chok/, /attack/, /physical/, /threw/, /spit/, /block/, /corner/, /\brape/, /molest/, /grope/, /fondl/, /forced/, /non.?consensual/],
+  physical:  [/assault/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /grab/, /chok/, /attack/, /physical/, /threw/, /spit/, /block/, /corner/, /\brape/, /molest/, /grope/, /fondl/, /forced/, /non.?consensual/,/sexual harassment/,/sexually harass/],
   online:    [/post/, /tweet/, /messag/, /\bemail\b/, /online/, /social media/, /instagram/, /facebook/, /\bdm\b/, /discord/, /snapchat/, /tiktok/, /comment/, /tagged/],
   written:   [/\bnote\b/, /\bsign\b/, /written/, /graffiti/, /letter/, /flyer/, /poster/, /whiteboard/, /chalk/],
   property:  [/damage/, /vandal/, /destroy/, /broke/, /stolen/, /stole/, /took my/, /keyed/, /slashed/, /property/],
@@ -36,7 +36,7 @@ const SEVERITY_SIGNALS = {
   high:   [
     // Sexual violence
     /\brape[ds]?\b/, /\braped\b/, /\brapin/, /sexual(ly)? assault/, /sexual(ly)? violen/, /molest/, /grope[ds]?/, /fondl/,
-    /forced .{0,20}(sex|kiss|touch|oral|penetr)/, /non.?consensual/, /without (my )?consent/,
+    /forced .{0,20}(sex|kiss|touch|oral|penetr)/, /non.?consensual/, /without (my )?consent/,/sexual harassment/,/sexually harass(ed|ment)?/,
     // Physical violence
     /assault/, /attack/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /chok/, /stab/, /weapon/, /\bgun\b/, /\bknife\b/,
     // Threats & fear
@@ -50,6 +50,7 @@ const SEVERITY_SIGNALS = {
     /repeated/, /multiple times/, /ongoing/, /every (day|week|time)/, /again and again/, /keeps? (doing|happening)/,
     // Residence targeting
     /\b(dorm|room|door)\b.{0,40}\b(slur|symbol|graffiti|threat|vandal)\b/,
+    
   ],
   medium: [
     /remark/, /comment/, /slur/, /discriminat/, /hostile/, /harass/, /uncomfortable/, /unwelcome/,
