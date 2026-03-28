@@ -1,6 +1,7 @@
 import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
+import TakeActionCard from '../components/TakeActionCard';
 import { exportReport } from '../utils/exportPdf';
 import { useI18n } from '../i18n';
 
@@ -63,6 +64,9 @@ export default function ReviewNavigatorScreen({ navigation, reportData, onSave, 
           </div>
           <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{draft_statement}</p>
         </div>
+
+        {/* Take action — encourage the student to send the report */}
+        <TakeActionCard advice={reportData?.advice} navigation={navigation} />
 
         {/* Actions */}
         <div className="flex flex-col gap-3">

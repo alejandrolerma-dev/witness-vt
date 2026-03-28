@@ -168,17 +168,17 @@ function buildSummary(text, incidentType, biasCategory, severity) {
 }
 
 const POLICY_MAP = {
-  physical:  { policy: "Dean of Students", url: "https://dos.vt.edu", office: "Virginia Tech Dean of Students Office" },
-  online:    { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)" },
-  written:   { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)" },
-  property:  { policy: "Dean of Students", url: "https://dos.vt.edu", office: "Virginia Tech Dean of Students Office" },
-  verbal:    { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)" },
-  other:     { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)" },
+  physical:  { policy: "Dean of Students", url: "https://dos.vt.edu", office: "Virginia Tech Dean of Students Office", email: "deanofstudents@vt.edu" },
+  online:    { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)", email: "oea@vt.edu" },
+  written:   { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)", email: "oea@vt.edu" },
+  property:  { policy: "Dean of Students", url: "https://dos.vt.edu", office: "Virginia Tech Dean of Students Office", email: "deanofstudents@vt.edu" },
+  verbal:    { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)", email: "oea@vt.edu" },
+  other:     { policy: "Bias Response Team", url: "https://oea.vt.edu/harassment-discrimination.html", office: "VT Office for Civil Rights Compliance (CRCPE)", email: "oea@vt.edu" },
 };
 
 const BIAS_POLICY_MAP = {
-  gender:             { policy: "Title IX", url: "https://safe.vt.edu", office: "Virginia Tech Title IX / Safe at VT" },
-  sexual_orientation: { policy: "Title IX", url: "https://safe.vt.edu", office: "Virginia Tech Title IX / Safe at VT" },
+  gender:             { policy: "Title IX", url: "https://safe.vt.edu", office: "Virginia Tech Title IX / Safe at VT", email: "titleix@vt.edu" },
+  sexual_orientation: { policy: "Title IX", url: "https://safe.vt.edu", office: "Virginia Tech Title IX / Safe at VT", email: "titleix@vt.edu" },
 };
 
 function _resolvePolicy(incidentType, biasCategory) {
@@ -197,7 +197,7 @@ function buildAdvice(incidentType, biasCategory, severity) {
     matched_policy: p.policy,
     policy_ambiguous: false,
     rights_summary: `As a Virginia Tech student, you have the right to report this ${biasCategory.replace("_", " ")}-related incident to the ${p.office}. ${urgency} The office will review your report confidentially and connect you with appropriate support resources. You are not required to identify yourself in your initial report.`,
-    vt_contact: { office: p.office, url: p.url },
+    vt_contact: { office: p.office, url: p.url, email: p.email },
   };
 }
 
