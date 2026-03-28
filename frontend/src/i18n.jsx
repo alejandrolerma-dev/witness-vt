@@ -5,7 +5,7 @@ const translations = {
     // Landing
     app_title: 'Witness',
     app_subtitle: 'You deserve to be heard. Safely.',
-    anonymous_banner: '100% anonymous · No account needed · No data stored',
+    anonymous_banner: '100% anonymous · No account needed · No personal info stored',
     step_document: 'Document',
     step_document_desc: 'Your words, structured into a clear record',
     step_understand: 'Understand',
@@ -65,13 +65,13 @@ const translations = {
     agent_navigator: 'Building your reporting path',
     // Exit
     left_safely: 'You\'ve left safely',
-    session_cleared: 'All session data has been cleared from this device. Nothing was stored.',
+    session_cleared: 'All session data has been cleared from this device. No personal information was stored.',
     close_tab: 'You can close this tab.',
   },
   es: {
     app_title: 'Witness',
     app_subtitle: 'Mereces ser escuchado/a. De forma segura.',
-    anonymous_banner: '100% anónimo · Sin cuenta necesaria · Sin datos almacenados',
+    anonymous_banner: '100% anónimo · Sin cuenta necesaria · Sin información personal',
     step_document: 'Documentar',
     step_document_desc: 'Tus palabras, estructuradas en un registro claro',
     step_understand: 'Entender',
@@ -131,7 +131,7 @@ const translations = {
   zh: {
     app_title: 'Witness',
     app_subtitle: '你值得被倾听。安全地。',
-    anonymous_banner: '100%匿名 · 无需账户 · 不存储数据',
+    anonymous_banner: '100%匿名 · 无需账户 · 不存储个人信息',
     step_document: '记录',
     step_document_desc: '将你的话语整理成清晰的记录',
     step_understand: '了解',

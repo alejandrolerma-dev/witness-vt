@@ -237,6 +237,7 @@ function buildNavigation(incidentType, biasCategory, severity, dateContext, loca
 
 // --- Persistent store for demo retrieval (survives refresh within same tab) ---
 const STORAGE_KEY = 'witness_demo_reports';
+const AGGREGATE_KEY = 'witness_demo_aggregates';
 
 function _loadReports() {
   try {
@@ -248,6 +249,26 @@ function _saveToStorage(token, report) {
   const reports = _loadReports();
   reports[token] = report;
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+}
+
+function _loadAggregates() {
+  try {
+    return JSON.parse(localStorage.getItem(AGGREGATE_KEY)) || [];
+  } catch { return []; }
+}
+
+function _recordAggregate(incidentRecord) {
+  const aggregates = _loadAggregates();
+  const now = new Date();
+  aggregates.push({
+    incident_type: incidentRecord.incident_type || 'other',
+    bias_category: incidentRecord.bias_category || 'other',
+    severity: incidentRecord.severity_indicator || 'low',
+    location: incidentRecord.location_context || 'Not specified',
+    month: now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    timestamp: now.toISOString(),
+  });
+  localStorage.setItem(AGGREGATE_KEY, JSON.stringify(aggregates));
 }
 
 // --- Emergency detection ---
@@ -328,21 +349,14 @@ function getSupportResources(biasCategory, severity) {
 
 export async function getStats() {
   await delay(300);
-  const saved = _loadReports();
-  const count = Object.keys(saved).length;
-  return { total_reports: count, reports_this_month: count };
+  const aggregates = _loadAggregates();
+  const now = new Date();
+  const thisMonth = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const thisMonthCount = aggregates.filter(a => a.month === thisMonth).length;
+  return { total_reports: aggregates.length, reports_this_month: thisMonthCount };
 }
 
-// --- Analytics data (computed from actual saved reports) ---
-
-function _countField(reports, path) {
-  const counts = {};
-  for (const r of reports) {
-    const val = path.split('.').reduce((o, k) => o?.[k], r) || 'other';
-    counts[val] = (counts[val] || 0) + 1;
-  }
-  return counts;
-}
+// --- Analytics data (computed from anonymous aggregates — no PII) ---
 
 // Known VT campus locations → coordinates for the heatmap
 const LOCATION_COORDS = {
@@ -368,34 +382,25 @@ function _matchLocation(locStr) {
 
 export async function getAnalytics() {
   await delay(500);
-  const saved = _loadReports();
-  const reports = Object.values(saved);
+  const aggregates = _loadAggregates();
 
-  // Build from actual saved data
-  const catCounts = _countField(reports, 'incident_record.bias_category');
-  const sevCounts = _countField(reports, 'incident_record.severity_indicator');
-  const typeCounts = _countField(reports, 'incident_record.incident_type');
-  const policyCounts = _countField(reports, 'advice.matched_policy');
-
-  // Location aggregation
+  // Count by each dimension from the anonymous aggregate records
+  const catCounts = {};
+  const sevCounts = {};
+  const typeCounts = {};
   const locCounts = {};
-  for (const r of reports) {
-    const loc = r.incident_record?.location_context || 'Not specified';
-    locCounts[loc] = (locCounts[loc] || 0) + 1;
-  }
-
-  // Month aggregation
   const monthCounts = {};
-  for (const r of reports) {
-    if (r.saved_at) {
-      const d = new Date(r.saved_at);
-      const key = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      monthCounts[key] = (monthCounts[key] || 0) + 1;
-    }
+
+  for (const a of aggregates) {
+    catCounts[a.bias_category] = (catCounts[a.bias_category] || 0) + 1;
+    sevCounts[a.severity] = (sevCounts[a.severity] || 0) + 1;
+    typeCounts[a.incident_type] = (typeCounts[a.incident_type] || 0) + 1;
+    locCounts[a.location] = (locCounts[a.location] || 0) + 1;
+    monthCounts[a.month] = (monthCounts[a.month] || 0) + 1;
   }
 
   return {
-    total_reports: reports.length,
+    total_reports: aggregates.length,
     by_category: Object.entries(catCounts).map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count),
     by_severity: Object.entries(sevCounts).map(([severity, count]) => ({ severity, count }))
@@ -407,8 +412,6 @@ export async function getAnalytics() {
       return match ? { ...match, count } : { location: loc, count, lat: null, lng: null };
     }).sort((a, b) => b.count - a.count),
     by_month: Object.entries(monthCounts).map(([month, count]) => ({ month, count })),
-    by_policy: Object.entries(policyCounts).map(([policy, count]) => ({ policy, count }))
-      .sort((a, b) => b.count - a.count),
   };
 }
 
@@ -449,6 +452,8 @@ export async function saveReport(incidentRecord, advice, navigation) {
   const token = "demo-token-" + Math.random().toString(36).slice(2, 10);
   const saved_at = new Date().toISOString();
   _saveToStorage(token, { incident_record: incidentRecord, advice, navigation, saved_at });
+  // Record anonymous aggregate (persists in localStorage across sessions)
+  _recordAggregate(incidentRecord);
   return { retrieval_token: token, saved_at };
 }
 
