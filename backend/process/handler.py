@@ -7,6 +7,8 @@ import logging
 from shared.auth import require_auth
 from shared.bedrock_client import BedrockError
 from shared.sanitize import contains_pii
+from shared.emergency import detect_emergency
+from shared.support_resources import get_support_resources
 from process.documenter import document, DocumenterError
 from process.advisor import advise, AdvisorError
 from process.navigator import navigate, NavigatorError
@@ -64,6 +66,9 @@ def handler(event, context):
             "error": "Your description appears to contain personal information. Please remove names, email addresses, or ID numbers before submitting."
         })
 
+    # --- Emergency detection (runs before pipeline) ---
+    emergency = detect_emergency(raw_text)
+
     # --- Pipeline ---
     incident_record = None
     advice = None
@@ -99,10 +104,20 @@ def handler(event, context):
             "partial": {"incident_record": incident_record, "advice": advice, "navigation": None},
         })
 
+    # --- Support resources (based on analysis) ---
+    support_resources = get_support_resources(
+        incident_record.get("bias_category", "other"),
+        incident_record.get("severity_indicator", "low"),
+    )
+
     # --- Success ---
     logger.info(json.dumps({"status": 200}))
-    return _response(200, {
+    result = {
         "incident_record": incident_record,
         "advice": advice,
         "navigation": navigation,
-    })
+        "support_resources": support_resources,
+    }
+    if emergency:
+        result["emergency"] = emergency
+    return _response(200, result)

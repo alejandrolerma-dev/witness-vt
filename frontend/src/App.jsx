@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from './useSession';
 import { processIncident, saveReport, retrieveReport, ApiError } from './api';
 
@@ -12,6 +12,7 @@ import SaveConfirmScreen from './screens/SaveConfirmScreen';
 import RetrievedReportScreen from './screens/RetrievedReportScreen';
 import ErrorScreen from './screens/ErrorScreen';
 import ExitScreen from './screens/ExitScreen';
+import AnalyticsDashboard from './screens/AnalyticsDashboard';
 
 export default function App() {
   const { status: sessionStatus, error: sessionError, sessionId, clearSession } = useSession();
@@ -23,6 +24,17 @@ export default function App() {
   const [retrievalToken, setRetrievalToken] = useState('');
   const [errorState, setErrorState] = useState(null);
   const [retrievedReport, setRetrievedReport] = useState(null);
+
+  // Auto-retrieve if URL has ?token= parameter (from QR code scan)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    if (urlToken && sessionStatus === 'ready') {
+      // Clear the URL param so refreshing doesn't re-trigger
+      window.history.replaceState({}, '', window.location.pathname);
+      handleRetrieve(urlToken).catch(() => {});
+    }
+  }, [sessionStatus]);
 
   function handleExit() {
     clearSession();
@@ -83,6 +95,7 @@ export default function App() {
           onStart={() => setScreen('describe')}
           onRetrieve={handleRetrieve}
           onExit={handleExit}
+          onDashboard={() => setScreen('dashboard')}
           sessionStatus={sessionStatus}
           sessionError={sessionError}
         />
@@ -106,6 +119,7 @@ export default function App() {
       return (
         <ReviewDocumenterScreen
           incidentRecord={reportData?.incident_record}
+          emergency={reportData?.emergency}
           onContinue={(editedRecord) => {
             setReportData(prev => ({ ...prev, incident_record: editedRecord }));
             setScreen('review_advisor');
@@ -119,6 +133,7 @@ export default function App() {
       return (
         <ReviewAdvisorScreen
           advice={reportData?.advice}
+          supportResources={reportData?.support_resources}
           onContinue={() => setScreen('review_navigator')}
           onBack={() => setScreen('review_documenter')}
           onExit={handleExit}
@@ -129,6 +144,7 @@ export default function App() {
       return (
         <ReviewNavigatorScreen
           navigation={reportData?.navigation}
+          reportData={reportData}
           onSave={handleSave}
           onExitWithoutSaving={() => { clearSession(); setScreen('exit'); }}
           onBack={() => setScreen('review_advisor')}
@@ -157,6 +173,13 @@ export default function App() {
         <RetrievedReportScreen
           report={retrievedReport}
           onBack={() => { setRetrievedReport(null); setScreen('landing'); }}
+        />
+      );
+
+    case 'dashboard':
+      return (
+        <AnalyticsDashboard
+          onBack={() => setScreen('landing')}
         />
       );
 

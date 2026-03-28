@@ -93,6 +93,15 @@ async function _retrieveReport(sessionId) {
   return apiFetch(`/report/${sessionId}`, { method: "GET" });
 }
 
+// Non-demo stubs for new endpoints (backend would implement these)
+async function _getStats() {
+  return apiFetch("/stats", { method: "GET" });
+}
+
+async function _getAnalytics() {
+  return apiFetch("/analytics", { method: "GET" });
+}
+
 // Demo mode — delegate to mock implementations when VITE_DEMO=true
 const IS_DEMO = import.meta.env.VITE_DEMO === "true";
 
@@ -100,3 +109,5 @@ export const createSession = IS_DEMO ? mock.createSession : _createSession;
 export const processIncident = IS_DEMO ? mock.processIncident : _processIncident;
 export const saveReport = IS_DEMO ? mock.saveReport : _saveReport;
 export const retrieveReport = IS_DEMO ? mock.retrieveReport : _retrieveReport;
+export const getStats = IS_DEMO ? mock.getStats : _getStats;
+export const getAnalytics = IS_DEMO ? mock.getAnalytics : _getAnalytics;

@@ -1,3 +1,5 @@
+import { exportReport } from '../utils/exportPdf';
+
 export default function RetrievedReportScreen({ report, onBack }) {
   const { incident_record, advice, navigation, saved_at } = report;
 
@@ -155,14 +157,27 @@ export default function RetrievedReportScreen({ report, onBack }) {
           </div>
         )}
 
-        {/* Back button */}
-        <button
-          onClick={onBack}
-          className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-        >
-          Back to home
-        </button>
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={onBack}
+            className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          >
+            Back to home
+          </button>
+          <button
+            onClick={() => exportReport(report)}
+            className="w-full py-3 rounded-2xl text-sm font-medium text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-2"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export as PDF
+          </button>
+        </div>
 
         {/* Zero PII reminder */}
         <p className="text-center text-xs text-white/30">

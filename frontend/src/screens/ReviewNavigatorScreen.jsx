@@ -1,8 +1,9 @@
 import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
+import { exportReport } from '../utils/exportPdf';
 
-export default function ReviewNavigatorScreen({ navigation, onSave, onExitWithoutSaving, onBack, onExit }) {
+export default function ReviewNavigatorScreen({ navigation, reportData, onSave, onExitWithoutSaving, onBack, onExit }) {
   const { reporting_steps = [], draft_statement = '' } = navigation;
 
   return (
@@ -88,6 +89,18 @@ export default function ReviewNavigatorScreen({ navigation, onSave, onExitWithou
               Save my report
             </button>
           </div>
+
+          <button
+            onClick={() => reportData && exportReport(reportData)}
+            className="w-full py-3 rounded-2xl text-sm font-medium text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-2"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export as PDF
+          </button>
 
           <button
             onClick={onExitWithoutSaving}

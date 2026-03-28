@@ -250,6 +250,168 @@ function _saveToStorage(token, report) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
 }
 
+// --- Emergency detection ---
+
+const EMERGENCY_PATTERNS = [
+  /\b(suicid|kill (my|him|her|them)self|end (my|their) life|don'?t want to (live|be alive))\b/i,
+  /\b(want(ing)? to die|better off dead|no reason to live)\b/i,
+  /\b(has a (gun|knife|weapon)|bomb threat|active shooter|brought a weapon)\b/i,
+  /\b(being attacked|attacking me|won'?t let me leave|can'?t (escape|get away|leave))\b/i,
+  /\b(locked (me )?in|holding me|trapped|hostage)\b/i,
+  /\b(need(s)? (help|911) (now|immediately|right now)|call (the )?police|in (immediate )?danger)\b/i,
+  /\b(life.?threatening|medical emergency)\b/i,
+];
+
+const EMERGENCY_RESOURCES = [
+  { name: "Emergency Services", contact: "911", description: "For immediate danger or medical emergency", type: "phone" },
+  { name: "VT Police", contact: "540-231-6411", description: "Virginia Tech Police Department — available 24/7", type: "phone" },
+  { name: "988 Suicide & Crisis Lifeline", contact: "988", description: "Free, confidential support 24/7 — call or text", type: "phone" },
+  { name: "Crisis Text Line", contact: "Text HOME to 741741", description: "Free crisis counseling via text message", type: "text" },
+  { name: "Cook Counseling Center", contact: "540-231-6557", description: "VT campus mental health — same-day appointments available", type: "phone" },
+];
+
+function detectEmergency(text) {
+  const t = text.toLowerCase();
+  for (const p of EMERGENCY_PATTERNS) {
+    if (p.test(t)) return { detected: true, resources: EMERGENCY_RESOURCES };
+  }
+  return null;
+}
+
+// --- Support resources ---
+
+const BASE_RESOURCES = [
+  { name: "Cook Counseling Center", contact: "540-231-6557", url: "https://ucc.vt.edu", description: "Free confidential counseling for all VT students — same-day crisis appointments available", type: "counseling" },
+  { name: "Dean of Students Office", contact: "540-231-3787", url: "https://dos.vt.edu", description: "Advocacy, emergency funding, and academic support during difficult situations", type: "advocacy" },
+];
+
+const CATEGORY_RESOURCES = {
+  gender: [
+    { name: "Women's Center at Virginia Tech", contact: "540-231-7806", url: "https://womenscenter.vt.edu", description: "Support, advocacy, and programming for gender-based concerns", type: "support" },
+    { name: "CARES (Survivors Support)", contact: "540-231-0045", url: "https://safe.vt.edu", description: "Confidential 24/7 support — does NOT trigger a mandatory report", type: "crisis" },
+  ],
+  sexual_orientation: [
+    { name: "LGBTQ+ Resource Center", contact: "540-231-3785", url: "https://lgbtq.vt.edu", description: "Community, support groups, and advocacy for LGBTQ+ students", type: "support" },
+    { name: "CARES (Survivors Support)", contact: "540-231-0045", url: "https://safe.vt.edu", description: "Confidential 24/7 support — does NOT trigger a mandatory report", type: "crisis" },
+  ],
+  race: [
+    { name: "Black Cultural Center", contact: "540-231-1834", url: "https://mlfs.vt.edu/bcc.html", description: "Community space, programming, and support for Black students", type: "support" },
+    { name: "Multicultural Programs & Services", contact: "540-231-1820", url: "https://mlfs.vt.edu", description: "Advocacy and resources for students of color", type: "support" },
+  ],
+  ethnicity: [
+    { name: "Multicultural Programs & Services", contact: "540-231-1820", url: "https://mlfs.vt.edu", description: "Advocacy and resources for underrepresented students", type: "support" },
+  ],
+  religion: [
+    { name: "Interfaith Engagement", contact: "540-231-3787", url: "https://dos.vt.edu", description: "Interfaith support and religious accommodation advocacy", type: "support" },
+  ],
+  national_origin: [
+    { name: "Cranwell International Center", contact: "540-231-6527", url: "https://international.vt.edu", description: "Immigration advising, advocacy, and support for international students", type: "support" },
+  ],
+  disability: [
+    { name: "Services for Students with Disabilities", contact: "540-231-3788", url: "https://ssd.vt.edu", description: "Accommodation support and disability rights advocacy", type: "support" },
+  ],
+};
+
+const HIGH_SEVERITY_RESOURCES = [
+  { name: "VT Police Department", contact: "540-231-6411", url: "https://police.vt.edu", description: "For incidents involving physical harm, threats, or criminal activity", type: "safety" },
+  { name: "988 Suicide & Crisis Lifeline", contact: "Call or text 988", description: "Free, confidential 24/7 crisis support", type: "crisis" },
+];
+
+function getSupportResources(biasCategory, severity) {
+  const resources = [...BASE_RESOURCES];
+  if (CATEGORY_RESOURCES[biasCategory]) resources.push(...CATEGORY_RESOURCES[biasCategory]);
+  if (severity === "high") resources.push(...HIGH_SEVERITY_RESOURCES);
+  return resources;
+}
+
+// --- Impact stats (demo data) ---
+
+export async function getStats() {
+  await delay(300);
+  const saved = _loadReports();
+  const count = Object.keys(saved).length;
+  return { total_reports: count, reports_this_month: count };
+}
+
+// --- Analytics data (computed from actual saved reports) ---
+
+function _countField(reports, path) {
+  const counts = {};
+  for (const r of reports) {
+    const val = path.split('.').reduce((o, k) => o?.[k], r) || 'other';
+    counts[val] = (counts[val] || 0) + 1;
+  }
+  return counts;
+}
+
+// Known VT campus locations → coordinates for the heatmap
+const LOCATION_COORDS = {
+  "torgersen hall":         { lat: 37.2296, lng: -80.4236 },
+  "newman library":         { lat: 37.2292, lng: -80.4186 },
+  "squires student center": { lat: 37.2291, lng: -80.4210 },
+  "goodwin hall":           { lat: 37.2304, lng: -80.4198 },
+  "mcbryde hall":           { lat: 37.2285, lng: -80.4245 },
+  "drill field":            { lat: 37.2278, lng: -80.4250 },
+  "dietrick":               { lat: 37.2275, lng: -80.4220 },
+  "d2":                     { lat: 37.2275, lng: -80.4220 },
+  "owens":                  { lat: 37.2265, lng: -80.4205 },
+};
+
+function _matchLocation(locStr) {
+  if (!locStr || locStr === 'Not specified') return null;
+  const lower = locStr.toLowerCase();
+  for (const [name, coords] of Object.entries(LOCATION_COORDS)) {
+    if (lower.includes(name)) return { location: locStr, ...coords };
+  }
+  return { location: locStr, lat: null, lng: null };
+}
+
+export async function getAnalytics() {
+  await delay(500);
+  const saved = _loadReports();
+  const reports = Object.values(saved);
+
+  // Build from actual saved data
+  const catCounts = _countField(reports, 'incident_record.bias_category');
+  const sevCounts = _countField(reports, 'incident_record.severity_indicator');
+  const typeCounts = _countField(reports, 'incident_record.incident_type');
+  const policyCounts = _countField(reports, 'advice.matched_policy');
+
+  // Location aggregation
+  const locCounts = {};
+  for (const r of reports) {
+    const loc = r.incident_record?.location_context || 'Not specified';
+    locCounts[loc] = (locCounts[loc] || 0) + 1;
+  }
+
+  // Month aggregation
+  const monthCounts = {};
+  for (const r of reports) {
+    if (r.saved_at) {
+      const d = new Date(r.saved_at);
+      const key = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      monthCounts[key] = (monthCounts[key] || 0) + 1;
+    }
+  }
+
+  return {
+    total_reports: reports.length,
+    by_category: Object.entries(catCounts).map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count),
+    by_severity: Object.entries(sevCounts).map(([severity, count]) => ({ severity, count }))
+      .sort((a, b) => b.count - a.count),
+    by_type: Object.entries(typeCounts).map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count),
+    by_location: Object.entries(locCounts).map(([loc, count]) => {
+      const match = _matchLocation(loc);
+      return match ? { ...match, count } : { location: loc, count, lat: null, lng: null };
+    }).sort((a, b) => b.count - a.count),
+    by_month: Object.entries(monthCounts).map(([month, count]) => ({ month, count })),
+    by_policy: Object.entries(policyCounts).map(([policy, count]) => ({ policy, count }))
+      .sort((a, b) => b.count - a.count),
+  };
+}
+
 // --- Exports ---
 
 export async function processIncident(rawText, structuredFields) {
@@ -262,7 +424,7 @@ export async function processIncident(rawText, structuredFields) {
   const severity = detectSeverity(rawText);
   const summary = buildSummary(rawText, incidentType, biasCategory, severity);
 
-  return {
+  const result = {
     incident_record: {
       incident_type: incidentType,
       date_context: dateContext,
@@ -273,7 +435,13 @@ export async function processIncident(rawText, structuredFields) {
     },
     advice: buildAdvice(incidentType, biasCategory, severity),
     navigation: buildNavigation(incidentType, biasCategory, severity, dateContext, locationContext),
+    support_resources: getSupportResources(biasCategory, severity),
   };
+
+  const emergency = detectEmergency(rawText);
+  if (emergency) result.emergency = emergency;
+
+  return result;
 }
 
 export async function saveReport(incidentRecord, advice, navigation) {

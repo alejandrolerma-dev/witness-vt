@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ExitButton from '../components/ExitButton';
+import { getStats } from '../api';
+import { useI18n, LanguageSwitcher } from '../i18n';
 
 /* ─── Keyframe styles injected once ─────────────────────────────────── */
 const STYLES = `
@@ -56,7 +58,7 @@ const STYLES = `
   .step-hover:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.18); }
 `;
 
-const steps = [
+const stepIcons = [
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -68,8 +70,8 @@ const steps = [
     ),
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
-    title: 'Document',
-    desc: 'Your words, structured into a clear record',
+    titleKey: 'step_document',
+    descKey: 'step_document_desc',
     animClass: 'anim-step-0',
   },
   {
@@ -81,8 +83,8 @@ const steps = [
     ),
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-600',
-    title: 'Understand',
-    desc: 'Know your rights under VT policy',
+    titleKey: 'step_understand',
+    descKey: 'step_understand_desc',
     animClass: 'anim-step-1',
   },
   {
@@ -93,13 +95,14 @@ const steps = [
     ),
     iconBg: 'bg-emerald-100',
     iconColor: 'text-emerald-600',
-    title: 'Act',
-    desc: 'Get a step-by-step path and draft statement',
+    titleKey: 'step_act',
+    descKey: 'step_act_desc',
     animClass: 'anim-step-2',
   },
 ];
 
-export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus, sessionError }) {
+export default function LandingPage({ onStart, onExit, onRetrieve, onDashboard, sessionStatus, sessionError }) {
+  const { t } = useI18n();
   const isLoading = sessionStatus === 'loading';
   const isError   = sessionStatus === 'error';
   const isReady   = sessionStatus === 'ready';
@@ -108,6 +111,11 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
   const [token, setToken] = useState('');
   const [retrieveError, setRetrieveError] = useState('');
   const [retrieving, setRetrieving] = useState(false);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getStats().then(setStats).catch(() => {});
+  }, []);
 
   async function handleRetrieve(e) {
     e.preventDefault();
@@ -153,8 +161,11 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
           }} />
         </div>
 
-        {/* ── Exit button ── */}
+        {/* ── Language switcher + Exit button ── */}
         <div className="relative z-10">
+          <div className="absolute top-4 left-4">
+            <LanguageSwitcher />
+          </div>
           <div className="absolute top-4 right-4">
             <button
               onClick={onExit}
@@ -176,7 +187,7 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                 <path d="M18 6L6 18M6 6l12 12"/>
               </svg>
-              Leave safely
+              {t('leave_safely')}
             </button>
           </div>
         </div>
@@ -207,12 +218,12 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
               backgroundClip: 'text',
             }}
           >
-            Witness
+            {t('app_title')}
           </h1>
 
           {/* Subtitle */}
           <p className="anim-subtitle text-white/60 text-base font-medium mb-10 text-center">
-            You deserve to be heard. Safely.
+            {t('app_subtitle')}
           </p>
 
           {/* Card */}
@@ -224,25 +235,54 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
             <div className="flex items-center gap-2.5 px-5 py-3.5 bg-emerald-50 border-b border-emerald-100">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
               <p className="text-emerald-800 text-xs font-semibold">
-                100% anonymous · No account needed · No data stored
+                {t('anonymous_banner')}
               </p>
             </div>
 
             <div className="p-6 flex flex-col gap-6">
 
+              {/* Impact counter / Dashboard link */}
+              {stats && (
+                <div className="flex items-center justify-between bg-indigo-50 rounded-2xl px-4 py-3 border border-indigo-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" aria-hidden="true">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      {stats.total_reports > 0 ? (
+                        <>
+                          <p className="text-indigo-900 text-sm font-bold">{stats.total_reports.toLocaleString()}</p>
+                          <p className="text-indigo-500 text-xs">{t('reports_filed')}</p>
+                        </>
+                      ) : (
+                        <p className="text-indigo-600 text-xs font-medium">Your reports power anonymous campus insights</p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={onDashboard}
+                    className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors flex-shrink-0"
+                  >
+                    {stats.total_reports > 0 ? t('view_trends') : 'Campus trends →'}
+                  </button>
+                </div>
+              )}
+
               {/* Steps */}
               <div className="flex flex-col gap-2">
-                {steps.map(({ icon, iconBg, iconColor, title, desc, animClass }) => (
+                {stepIcons.map(({ icon, iconBg, iconColor, titleKey, descKey, animClass }) => (
                   <div
-                    key={title}
+                    key={titleKey}
                     className={`${animClass} step-hover flex items-center gap-3.5 p-3 rounded-2xl cursor-default`}
                   >
                     <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor}`}>
                       {icon}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{title}</p>
-                      <p className="text-xs text-slate-400 leading-snug">{desc}</p>
+                      <p className="text-sm font-semibold text-slate-800">{t(titleKey)}</p>
+                      <p className="text-xs text-slate-400 leading-snug">{t(descKey)}</p>
                     </div>
                   </div>
                 ))}
@@ -280,11 +320,11 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
                       : '#94a3b8',
                   }}
                 >
-                  {isLoading ? 'Preparing…' : 'Start my report'}
+                  {isLoading ? t('preparing') : t('start_report')}
                 </button>
 
                 <p className="text-center text-xs text-slate-400">
-                  Your identity is never recorded or stored
+                  {t('identity_never_stored')}
                 </p>
               </div>
 
@@ -301,7 +341,7 @@ export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    Have a retrieval token?
+                    {t('have_token')}
                   </button>
                 ) : (
                   <form onSubmit={handleRetrieve} className="flex flex-col gap-2.5">

@@ -1,8 +1,9 @@
 import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
+import SupportResources from '../components/SupportResources';
 
-export default function ReviewAdvisorScreen({ advice, onContinue, onBack, onExit }) {
+export default function ReviewAdvisorScreen({ advice, supportResources, onContinue, onBack, onExit }) {
   const { matched_policy, policy_ambiguous, rights_summary, vt_contact } = advice;
 
   return (
@@ -74,6 +75,9 @@ export default function ReviewAdvisorScreen({ advice, onContinue, onBack, onExit
             </a>
           </div>
         </div>
+
+        {/* Support resources */}
+        <SupportResources resources={supportResources} />
 
         <div className="flex gap-3">
           <button

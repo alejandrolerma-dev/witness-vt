@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
   const [copied, setCopied] = useState(false);
@@ -38,6 +39,22 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
           >
             {copied ? '✓ Copied!' : 'Copy token'}
           </button>
+
+          {/* QR Code — encodes a full URL so scanning opens the app with the token */}
+          <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-100">
+            <p className="text-xs text-slate-400">Or scan this QR code to retrieve later</p>
+            <div className="bg-white p-3 rounded-2xl border border-slate-100">
+              <QRCodeSVG
+                value={`${window.location.origin}?token=${encodeURIComponent(retrievalToken)}`}
+                size={140}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#1a1f36"
+              />
+            </div>
+            <p className="text-xs text-slate-300">Scanning opens Witness with your token pre-filled</p>
+          </div>
+
           <p className="text-xs text-slate-400 text-center">No personal information was stored.</p>
           <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-3 py-2.5 border border-amber-100">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" className="flex-shrink-0 mt-0.5" aria-hidden="true">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ScreenLayout from '../components/ScreenLayout';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
+import EmergencyBanner from '../components/EmergencyBanner';
 
 const SEVERITY_STYLES = {
   high:   { pill: 'bg-red-50 text-red-600 border-red-100',    label: '⚠️ High' },
@@ -25,7 +26,7 @@ const STATIC_FIELDS = [
   { key: 'severity_indicator', label: 'Severity',         icon: '⚡' },
 ];
 
-export default function ReviewDocumenterScreen({ incidentRecord, onContinue, onBack, onExit }) {
+export default function ReviewDocumenterScreen({ incidentRecord, emergency, onContinue, onBack, onExit }) {
   const [summary, setSummary] = useState(incidentRecord?.description_summary ?? '');
   const [editingSummary, setEditingSummary] = useState(false);
 
@@ -40,6 +41,9 @@ export default function ReviewDocumenterScreen({ incidentRecord, onContinue, onB
   return (
     <ScreenLayout onExit={onExit} step={1}>
       <div className="w-full max-w-lg flex flex-col gap-5">
+
+        {/* Emergency banner */}
+        <EmergencyBanner emergency={emergency} />
 
         {/* Header */}
         <div className="flex items-start justify-between">
