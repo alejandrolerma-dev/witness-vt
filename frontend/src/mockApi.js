@@ -34,11 +34,11 @@ const BIAS_SIGNALS = {
 
 const SEVERITY_SIGNALS = {
   high:   [
-    // Sexual violence
+    // Sexual violence & sexual harassment
     /\brape[ds]?\b/, /\braped\b/, /\brapin/, /sexual(ly)? assault/, /sexual(ly)? violen/, /molest/, /grope[ds]?/, /fondl/,
     /forced .{0,20}(sex|kiss|touch|oral|penetr)/, /non.?consensual/, /without (my )?consent/,/sexual harassment/,/sexually harass(ed|ment)?/,
     // Physical violence
-    /assault/, /attack/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /chok/, /stab/, /weapon/, /\bgun\b/, /\bknife\b/,
+    /assault/, /attack/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /chok/, /stab/, /weapon/, /\bgun\b/, /\bknife\b/, /beat/,
     // Threats & fear
     /\bthreat/, /intimidat/, /unsafe/, /scared/, /\bfear/, /\bafraid/, /watch your back/, /you('ll| will) regret/,
     /kill/, /\bdie\b/, /\bdeath\b/,
@@ -219,7 +219,7 @@ function buildNavigation(incidentType, biasCategory, severity, dateContext, loca
     {
       step_number: 3,
       action: "Optionally, request a meeting with the Office for Equity and Accessibility to explore formal complaint options",
-      estimated_timeline: "Schedule within 1–2 weeks",
+      estimated_timeline: "Schedule within 1-2 weeks",
     },
     {
       step_number: 4,
