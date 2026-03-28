@@ -36,6 +36,10 @@ REQUIRED_FIELDS = {
 
 # HIGH severity keyword signals in raw text
 _HIGH_SIGNALS = [
+    # Sexual violence — always high
+    r"\b(rap(e[ds]?|ed|ing)|sexual(ly)? assault(ed)?|sexual(ly)? violen(ce|t)|molest(ed|ation)?)\b",
+    r"\b(grope[ds]?|fondl(ed|ing)?|non.?consensual|without (my )?consent)\b",
+    r"\bforced\b.{0,20}\b(sex|kiss(ed)?|touch(ed)?|oral|penetrat)\b",
     # Physical
     r"\b(push(ed)?|shov(ed)?|hit|struck|assault(ed)?|attack(ed)?|grab(bed)?|chok(ed)?|block(ed)?)\b",
     # Threats

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSession } from './useSession';
-import { processIncident, saveReport, ApiError } from './api';
+import { processIncident, saveReport, retrieveReport, ApiError } from './api';
 
 import LandingPage from './screens/LandingPage';
 import DescribeIncidentScreen from './screens/DescribeIncidentScreen';
@@ -9,6 +9,7 @@ import ReviewDocumenterScreen from './screens/ReviewDocumenterScreen';
 import ReviewAdvisorScreen from './screens/ReviewAdvisorScreen';
 import ReviewNavigatorScreen from './screens/ReviewNavigatorScreen';
 import SaveConfirmScreen from './screens/SaveConfirmScreen';
+import RetrievedReportScreen from './screens/RetrievedReportScreen';
 import ErrorScreen from './screens/ErrorScreen';
 import ExitScreen from './screens/ExitScreen';
 
@@ -21,6 +22,7 @@ export default function App() {
   const [reportData, setReportData] = useState(null);
   const [retrievalToken, setRetrievalToken] = useState('');
   const [errorState, setErrorState] = useState(null);
+  const [retrievedReport, setRetrievedReport] = useState(null);
 
   function handleExit() {
     clearSession();
@@ -29,6 +31,7 @@ export default function App() {
     setReportData(null);
     setRetrievalToken('');
     setErrorState(null);
+    setRetrievedReport(null);
     setScreen('exit');
   }
 
@@ -47,6 +50,15 @@ export default function App() {
       });
       setScreen('error');
     }
+  }
+
+  async function handleRetrieve(token) {
+    const result = await retrieveReport(token);
+    if (result.error) {
+      throw new Error(result.error);
+    }
+    setRetrievedReport(result);
+    setScreen('retrieved');
   }
 
   async function handleSave() {
@@ -69,6 +81,7 @@ export default function App() {
       return (
         <LandingPage
           onStart={() => setScreen('describe')}
+          onRetrieve={handleRetrieve}
           onExit={handleExit}
           sessionStatus={sessionStatus}
           sessionError={sessionError}
@@ -127,7 +140,23 @@ export default function App() {
       return (
         <SaveConfirmScreen
           retrievalToken={retrievalToken}
+          onHome={() => {
+            setRawText('');
+            setStructuredFields({});
+            setReportData(null);
+            setErrorState(null);
+            setRetrievedReport(null);
+            setScreen('landing');
+          }}
           onDone={() => { clearSession(); setScreen('exit'); }}
+        />
+      );
+
+    case 'retrieved':
+      return (
+        <RetrievedReportScreen
+          report={retrievedReport}
+          onBack={() => { setRetrievedReport(null); setScreen('landing'); }}
         />
       );
 

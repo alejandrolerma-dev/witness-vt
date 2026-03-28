@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function SaveConfirmScreen({ retrievalToken, onDone }) {
+export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -39,14 +39,29 @@ export default function SaveConfirmScreen({ retrievalToken, onDone }) {
             {copied ? '✓ Copied!' : 'Copy token'}
           </button>
           <p className="text-xs text-slate-400 text-center">No personal information was stored.</p>
+          <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-3 py-2.5 border border-amber-100">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" className="flex-shrink-0 mt-0.5" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4l3 3"/>
+            </svg>
+            <p className="text-xs text-amber-700">This report will auto-delete after <strong>90 days</strong>. Save your token to retrieve it before then.</p>
+          </div>
         </div>
-        <button
-          onClick={onDone}
-          className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-        >
-          Done
-        </button>
+        <div className="w-full flex flex-col gap-3">
+          <button
+            onClick={onHome}
+            className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          >
+            Return to home
+          </button>
+          <button
+            onClick={onDone}
+            className="w-full py-3 rounded-2xl text-sm font-semibold text-white/50 hover:text-white/70 border border-white/10 hover:border-white/20 transition-all"
+          >
+            Exit
+          </button>
+        </div>
       </div>
     </div>
   );
