@@ -7,12 +7,6 @@ const agents = [
   { label: 'Navigator', descKey: 'agent_navigator' },
 ];
 
-const AGENT_DESC_FALLBACK = {
-  agent_documenter: 'Structuring your incident record',
-  agent_advisor: 'Identifying your rights under VT policy',
-  agent_navigator: 'Building your reporting path',
-};
-
 export default function ProcessingScreen({ onExit }) {
   const { t } = useI18n();
 
@@ -52,7 +46,7 @@ export default function ProcessingScreen({ onExit }) {
                 style={{ animationDelay: `${i * 0.3}s`, animationDuration: '1.2s' }} />
               <div>
                 <p className="text-white/80 text-xs font-semibold">{label}</p>
-                <p className="text-white/30 text-xs">{t(descKey) !== descKey ? t(descKey) : AGENT_DESC_FALLBACK[descKey]}</p>
+                <p className="text-white/30 text-xs">{t(descKey)}</p>
               </div>
             </div>
           ))}

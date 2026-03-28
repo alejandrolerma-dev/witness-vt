@@ -20,18 +20,22 @@ _POLICY_CONTACTS = {
     "Bias Response Team": {
         "office": "VT Office for Civil Rights Compliance (CRCPE)",
         "url": "https://oea.vt.edu/harassment-discrimination.html",
+        "email": "oea@vt.edu",
     },
     "Title IX": {
         "office": "Virginia Tech Title IX / Safe at VT",
         "url": "https://safe.vt.edu",
+        "email": "titleix@vt.edu",
     },
     "Honor Code": {
         "office": "Virginia Tech Office of Academic Integrity",
         "url": "https://honorsystem.vt.edu",
+        "email": "honorsystem@vt.edu",
     },
     "Dean of Students": {
         "office": "Virginia Tech Dean of Students Office",
         "url": "https://dos.vt.edu",
+        "email": "deanofstudents@vt.edu",
     },
 }
 

@@ -251,7 +251,7 @@ export default function AnalyticsDashboard({ onBack }) {
             )}
 
             {/* Policy routing */}
-            {data.by_policy.length > 0 && (
+            {data.by_policy?.length > 0 && (
               <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Reports by policy</p>
                 <DonutChart data={data.by_policy} labelKey="policy" valueKey="count" colors={POLICY_COLORS} />

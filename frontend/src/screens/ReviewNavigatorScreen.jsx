@@ -1,9 +1,12 @@
 import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
+import TakeActionCard from '../components/TakeActionCard';
 import { exportReport } from '../utils/exportPdf';
+import { useI18n } from '../i18n';
 
 export default function ReviewNavigatorScreen({ navigation, reportData, onSave, onExitWithoutSaving, onBack, onExit }) {
+  const { t } = useI18n();
   const { reporting_steps = [], draft_statement = '' } = navigation;
 
   return (
@@ -62,6 +65,9 @@ export default function ReviewNavigatorScreen({ navigation, reportData, onSave, 
           <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{draft_statement}</p>
         </div>
 
+        {/* Take action — encourage the student to send the report */}
+        <TakeActionCard advice={reportData?.advice} navigation={navigation} />
+
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
@@ -79,14 +85,14 @@ export default function ReviewNavigatorScreen({ navigation, reportData, onSave, 
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                 <path d="M19 12H5M12 5l-7 7 7 7"/>
               </svg>
-              Back
+              {t('back')}
             </button>
             <button
               onClick={onSave}
               className="flex-1 py-4 rounded-2xl text-sm font-semibold text-white transition-all"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
             >
-              Save my report
+              {t('save_report')}
             </button>
           </div>
 
@@ -99,14 +105,14 @@ export default function ReviewNavigatorScreen({ navigation, reportData, onSave, 
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Export as PDF
+            {t('export_pdf')}
           </button>
 
           <button
             onClick={onExitWithoutSaving}
             className="w-full py-3 rounded-2xl text-sm font-medium text-white/40 hover:text-white/60 transition-colors text-center"
           >
-            Exit without saving
+            {t('exit_without_saving')}
           </button>
         </div>
       </div>

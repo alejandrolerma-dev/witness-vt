@@ -2,8 +2,10 @@ import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
 import SupportResources from '../components/SupportResources';
+import { useI18n } from '../i18n';
 
 export default function ReviewAdvisorScreen({ advice, supportResources, onContinue, onBack, onExit }) {
+  const { t } = useI18n();
   const { matched_policy, policy_ambiguous, rights_summary, vt_contact } = advice;
 
   return (
@@ -87,14 +89,14 @@ export default function ReviewAdvisorScreen({ advice, supportResources, onContin
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>
-            Back
+            {t('back')}
           </button>
           <button
             onClick={onContinue}
             className="flex-1 py-4 rounded-2xl text-sm font-semibold text-white transition-all"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
           >
-            See my reporting path
+            {t('see_reporting_path')}
           </button>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useI18n } from '../i18n';
-
 export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
@@ -14,7 +13,7 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-5"
+      className="min-h-screen flex flex-col items-center px-5 py-10"
       style={{ background: 'linear-gradient(160deg, #1a1f36 0%, #1e2444 60%, #1a1f36 100%)' }}
     >
       <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
@@ -42,12 +41,12 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
             {copied ? t('copied') : t('copy_token')}
           </button>
 
-          {/* QR Code — encodes a full URL so scanning opens the app with the token */}
+          {/* QR Code */}
           <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-100">
             <p className="text-xs text-slate-400">{t('qr_screenshot')}</p>
             <div className="bg-white p-3 rounded-2xl border border-slate-100">
               <QRCodeSVG
-                value={`${window.location.origin}?token=${encodeURIComponent(retrievalToken)}`}
+                value={`https://witness-vt.vercel.app?token=${encodeURIComponent(retrievalToken)}`}
                 size={140}
                 level="M"
                 bgColor="#ffffff"
@@ -65,6 +64,7 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
             <p className="text-xs text-amber-700">{t('auto_delete')}</p>
           </div>
         </div>
+
         <div className="w-full flex flex-col gap-3">
           <button
             onClick={onHome}

@@ -11,6 +11,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from shared.auth import require_auth
+from shared.aggregate import record_aggregate
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -100,6 +101,9 @@ def handler(event, context):
     except ClientError:
         logger.info(json.dumps({"status": 500}))
         return _response(500, {"error": "Save failed. You can copy your report content instead."})
+
+    # --- Write anonymous aggregate (best-effort, never blocks) ---
+    record_aggregate(incident_record)
 
     logger.info(json.dumps({"status": 200}))
     return _response(200, {"retrieval_token": session_id, "saved_at": saved_at})
