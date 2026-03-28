@@ -1,71 +1,89 @@
+import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
-import ExitButton from '../components/ExitButton';
-import WhiteCard from '../components/WhiteCard';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
 
 export default function ReviewAdvisorScreen({ advice, onContinue, onBack, onExit }) {
   const { matched_policy, policy_ambiguous, rights_summary, vt_contact } = advice;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 py-10" style={{ backgroundColor: '#1a1f36' }}>
-      <ExitButton onExit={onExit} />
+    <ScreenLayout onExit={onExit} step={2}>
+      <div className="w-full max-w-lg flex flex-col gap-5">
 
-      <WhiteCard className="max-w-lg w-full">
-        <div className="flex flex-col gap-5">
-          {/* Top row: back + badge */}
-          <div className="flex items-center justify-between">
-            <BackButton onBack={onBack} label="Back to Record" />
+        {/* Header */}
+        <div>
+          <BackButton onBack={onBack} label="Back to record" />
+          <div className="flex items-start justify-between mt-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <span className="text-blue-400 text-xs font-semibold uppercase tracking-wide">Step 2 · Advisor</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white">Your rights</h1>
+              <p className="text-white/40 text-sm mt-1">Based on VT policy that applies to your situation</p>
+            </div>
             <ZeroPIIBadge />
           </div>
+        </div>
 
-          {/* Heading */}
-          <h1 className="text-xl font-semibold text-gray-900">
-            Your rights under VT policy
-          </h1>
+        {/* Policy match */}
+        <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
 
-          {/* Policy badge */}
-          <div className="flex flex-col gap-1">
-            <span className="bg-indigo-100 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full self-start">
-              {matched_policy}
-            </span>
-            {policy_ambiguous && (
-              <p className="text-gray-500 text-xs italic">
-                Policy match is approximate — Bias Response Team is the default.
-              </p>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4l3 3"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Applicable policy</p>
+              <p className="text-base font-bold text-slate-800">{matched_policy}</p>
+            </div>
           </div>
 
-          {/* Rights section */}
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold text-gray-800">Your rights:</p>
-            <p className="text-gray-700 text-sm leading-relaxed">{rights_summary}</p>
+          {policy_ambiguous && (
+            <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-3 py-2.5 border border-amber-100">
+              <span className="text-amber-500 text-sm mt-0.5">ℹ️</span>
+              <p className="text-xs text-amber-700">Policy match is approximate — defaulting to Bias Response Team.</p>
+            </div>
+          )}
+
+          <div className="border-t border-slate-100 pt-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">What this means for you</p>
+            <p className="text-sm text-slate-600 leading-relaxed">{rights_summary}</p>
           </div>
 
-          {/* VT Contact section */}
-          <div className="flex flex-col gap-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Contact office:
-            </p>
-            <p className="text-gray-900 text-sm font-medium">{vt_contact.office}</p>
+          <div className="border-t border-slate-100 pt-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Who to contact</p>
+            <p className="text-sm font-semibold text-slate-800 mb-1">{vt_contact.office}</p>
             <a
               href={vt_contact.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 underline text-sm"
+              className="inline-flex items-center gap-1.5 text-brand text-sm hover:underline"
             >
               {vt_contact.url}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
             </a>
           </div>
-
-          {/* Continue button */}
-          <button
-            onClick={onContinue}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-lg w-full transition"
-          >
-            Continue
-          </button>
         </div>
-      </WhiteCard>
-    </div>
+
+        <button
+          onClick={onContinue}
+          className="w-full py-4 rounded-2xl text-sm font-semibold text-white transition-all"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+        >
+          See my reporting path
+        </button>
+      </div>
+    </ScreenLayout>
   );
 }

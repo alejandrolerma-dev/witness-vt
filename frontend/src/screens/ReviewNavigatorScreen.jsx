@@ -1,72 +1,92 @@
+import ScreenLayout from '../components/ScreenLayout';
 import BackButton from '../components/BackButton';
-import ExitButton from '../components/ExitButton';
-import WhiteCard from '../components/WhiteCard';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
 
 export default function ReviewNavigatorScreen({ navigation, onSave, onExitWithoutSaving, onBack, onExit }) {
   const { reporting_steps = [], draft_statement = '' } = navigation;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 py-10" style={{ backgroundColor: '#1a1f36' }}>
-      <ExitButton onExit={onExit} />
+    <ScreenLayout onExit={onExit} step={3}>
+      <div className="w-full max-w-lg flex flex-col gap-5">
 
-      <WhiteCard className="max-w-lg w-full">
-        <div className="flex flex-col gap-5">
-          {/* Top row: back + badge */}
-          <div className="flex items-center justify-between">
-            <BackButton onBack={onBack} label="Back to Rights" />
+        {/* Header */}
+        <div>
+          <BackButton onBack={onBack} label="Back to rights" />
+          <div className="flex items-start justify-between mt-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <span className="text-emerald-400 text-xs font-semibold uppercase tracking-wide">Step 3 · Navigator</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white">Your next steps</h1>
+              <p className="text-white/40 text-sm mt-1">A clear path forward, ready when you are</p>
+            </div>
             <ZeroPIIBadge />
           </div>
+        </div>
 
-          {/* Heading */}
-          <h1 className="text-xl font-semibold text-gray-900">Your reporting path</h1>
-
-          {/* Section 1 — Reporting steps */}
+        {/* Reporting steps */}
+        <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Reporting steps</p>
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-semibold text-gray-800">Reporting steps:</p>
-            <ol className="flex flex-col gap-4">
-              {reporting_steps.map((step) => (
-                <li key={step.step_number} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
-                    {step.step_number}
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm text-gray-900">{step.action}</span>
-                    <span className="text-xs text-gray-400 italic">{step.estimated_timeline}</span>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* Section 2 — Draft statement */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-semibold text-gray-800">Draft statement:</p>
-            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {draft_statement}
-            </div>
-          </div>
-
-          {/* Privacy note + buttons */}
-          <div className="flex flex-col gap-2 pt-1">
-            <p className="text-xs text-gray-400 text-center">
-              Saving stores only your anonymous session ID — no personal information.
-            </p>
-            <button
-              onClick={onSave}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-lg w-full transition"
-            >
-              Save Report
-            </button>
-            <button
-              onClick={onExitWithoutSaving}
-              className="text-gray-500 hover:text-gray-700 text-sm w-full text-center py-2 transition"
-            >
-              Exit Without Saving
-            </button>
+            {reporting_steps.map((step, i) => (
+              <div key={step.step_number} className="flex items-start gap-3.5">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  {step.step_number}
+                </div>
+                <div className="flex-1 pt-0.5">
+                  <p className="text-sm text-slate-700 leading-snug">{step.action}</p>
+                  <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                    </svg>
+                    {step.estimated_timeline}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </WhiteCard>
-    </div>
+
+        {/* Draft statement */}
+        <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Draft statement</p>
+            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium border border-emerald-100">Ready to file</span>
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{draft_statement}</p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <p className="text-white/50 text-xs">Saving only stores your anonymous session ID — no personal info</p>
+          </div>
+
+          <button
+            onClick={onSave}
+            className="w-full py-4 rounded-2xl text-sm font-semibold text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          >
+            Save my report
+          </button>
+
+          <button
+            onClick={onExitWithoutSaving}
+            className="w-full py-3 rounded-2xl text-sm font-medium text-white/40 hover:text-white/60 transition-colors text-center"
+          >
+            Exit without saving
+          </button>
+        </div>
+      </div>
+    </ScreenLayout>
   );
 }
