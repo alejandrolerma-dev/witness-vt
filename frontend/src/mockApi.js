@@ -17,8 +17,9 @@ function detectIncidentType(text) {
   if (/assault|hit|punch|push|shov|kick|grab|touch|attack|physical/.test(t)) return "physical";
   if (/post|tweet|messag|text|email|online|social media|instagram|facebook|dm|comment/.test(t)) return "online";
   if (/note|sign|written|graffiti|letter|flyer|poster/.test(t)) return "written";
-  if (/damage|vandal|destroy|broke|stolen|property/.test(t)) return "property";
+  if (/damage|vandal|destroy|broke|stolen|property|stole|took/.test(t)) return "property";
   if (/said|told|called|slur|remark|comment|verbal|yell|shout|spoke/.test(t)) return "verbal";
+
   return "other";
 }
 
