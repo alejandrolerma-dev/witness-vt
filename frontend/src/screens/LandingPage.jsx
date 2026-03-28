@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ExitButton from '../components/ExitButton';
 
 /* ─── Keyframe styles injected once ─────────────────────────────────── */
@@ -98,10 +99,30 @@ const steps = [
   },
 ];
 
-export default function LandingPage({ onStart, onExit, sessionStatus, sessionError }) {
+export default function LandingPage({ onStart, onExit, onRetrieve, sessionStatus, sessionError }) {
   const isLoading = sessionStatus === 'loading';
   const isError   = sessionStatus === 'error';
   const isReady   = sessionStatus === 'ready';
+
+  const [showRetrieve, setShowRetrieve] = useState(false);
+  const [token, setToken] = useState('');
+  const [retrieveError, setRetrieveError] = useState('');
+  const [retrieving, setRetrieving] = useState(false);
+
+  async function handleRetrieve(e) {
+    e.preventDefault();
+    const trimmed = token.trim();
+    if (!trimmed) return;
+    setRetrieveError('');
+    setRetrieving(true);
+    try {
+      await onRetrieve(trimmed);
+    } catch (err) {
+      setRetrieveError(err.message || 'Report not found. Check your token and try again.');
+    } finally {
+      setRetrieving(false);
+    }
+  }
 
   return (
     <>
@@ -265,6 +286,59 @@ export default function LandingPage({ onStart, onExit, sessionStatus, sessionErr
                 <p className="text-center text-xs text-slate-400">
                   Your identity is never recorded or stored
                 </p>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-slate-100" />
+
+              {/* Retrieve report */}
+              <div className="flex flex-col gap-3">
+                {!showRetrieve ? (
+                  <button
+                    onClick={() => setShowRetrieve(true)}
+                    className="flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-indigo-600 transition-colors py-1"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Have a retrieval token?
+                  </button>
+                ) : (
+                  <form onSubmit={handleRetrieve} className="flex flex-col gap-2.5">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Retrieve a saved report</p>
+                    <input
+                      type="text"
+                      value={token}
+                      onChange={(e) => { setToken(e.target.value); setRetrieveError(''); }}
+                      placeholder="Paste your retrieval token"
+                      className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50 border border-slate-200 text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300"
+                      autoFocus
+                    />
+                    {retrieveError && (
+                      <p className="text-xs text-red-500">{retrieveError}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setShowRetrieve(false); setToken(''); setRetrieveError(''); }}
+                        className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!token.trim() || retrieving || !isReady}
+                        className="flex-1 py-2 rounded-xl text-xs font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                      >
+                        {retrieving ? 'Retrieving...' : 'Retrieve report'}
+                      </button>
+                    </div>
+                    <p className="text-center text-xs text-slate-400">
+                      Reports auto-delete after 90 days
+                    </p>
+                  </form>
+                )}
               </div>
             </div>
           </div>
