@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import WhiteCard from '../components/WhiteCard';
 
 export default function SaveConfirmScreen({ retrievalToken, onDone }) {
   const [copied, setCopied] = useState(false);
@@ -12,48 +11,43 @@ export default function SaveConfirmScreen({ retrievalToken, onDone }) {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center px-4 py-10"
-      style={{ backgroundColor: '#1a1f36' }}
+      className="min-h-screen flex flex-col items-center justify-center px-5"
+      style={{ background: 'linear-gradient(160deg, #1a1f36 0%, #1e2444 60%, #1a1f36 100%)' }}
     >
-      <WhiteCard className="max-w-md w-full">
-        <div className="flex flex-col items-center gap-5 text-center">
-          {/* Checkmark icon */}
-          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-            <span className="text-green-600 text-2xl font-bold">✓</span>
-          </div>
-
-          {/* Heading */}
-          <h1 className="text-xl font-semibold text-gray-900">Report saved</h1>
-
-          {/* Subtext */}
-          <p className="text-gray-600 text-sm leading-relaxed">
-            Use this token to retrieve your report later. It's the only way to access it.
+      <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
+        <div className="w-20 h-20 rounded-full flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">Report saved</h1>
+          <p className="text-white/50 text-sm leading-relaxed">
+            Use this token to retrieve your report later.
           </p>
-
-          {/* Token display */}
-          <div className="bg-gray-50 rounded-lg p-3 font-mono text-sm text-gray-800 break-all text-center w-full">
+        </div>
+        <div className="w-full bg-white rounded-3xl shadow-card p-5 flex flex-col gap-3">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Your retrieval token</p>
+          <div className="bg-slate-50 rounded-2xl px-4 py-3 font-mono text-sm text-slate-700 break-all border border-slate-100">
             {retrievalToken}
           </div>
-
-          {/* Copy button */}
-          <button onClick={handleCopy} className="text-indigo-600 text-sm hover:underline">
-            {copied ? 'Copied!' : 'Copy token'}
-          </button>
-
-          {/* Privacy note */}
-          <p className="text-gray-400 text-xs">
-            No personal information was stored. This token is anonymous.
-          </p>
-
-          {/* Done button */}
           <button
-            onClick={onDone}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-lg w-full transition"
+            onClick={handleCopy}
+            className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${copied ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
-            Done
+            {copied ? '✓ Copied!' : 'Copy token'}
           </button>
+          <p className="text-xs text-slate-400 text-center">No personal information was stored.</p>
         </div>
-      </WhiteCard>
+        <button
+          onClick={onDone}
+          className="w-full py-4 rounded-2xl text-sm font-semibold text-white"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+        >
+          Done
+        </button>
+      </div>
     </div>
   );
 }
