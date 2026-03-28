@@ -4,7 +4,7 @@
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function createSession() {
-  await delay(800);
+  await delay(400);
   return {
     session_id: "demo-session-" + Math.random().toString(36).slice(2, 10),
     id_token: "demo-token",
@@ -13,7 +13,7 @@ export async function createSession() {
 }
 
 export async function processIncident(rawText) {
-  await delay(2000); // simulate AI processing
+  await delay(1500); // simulate AI processing
   return {
     incident_record: {
       incident_type: "verbal",
