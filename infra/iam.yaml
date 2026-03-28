@@ -139,10 +139,11 @@ Resources:
                   - logs:PutLogEvents
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/witness-retrieve:*"
               # DynamoDB — read only, scoped to witness-reports table
-              - Sid: AllowDynamoDBGetItem
+              - Sid: AllowDynamoDBRead
                 Effect: Allow
                 Action:
                   - dynamodb:GetItem
+                  - dynamodb:Query
                 Resource: !ImportValue WitnessTableArn
               # KMS — needed to decrypt KMS-encrypted DynamoDB items
               - Sid: AllowKmsForRetrieve
