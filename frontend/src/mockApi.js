@@ -235,20 +235,20 @@ function buildNavigation(incidentType, biasCategory, severity, dateContext, loca
   return { reporting_steps: steps, draft_statement: draft };
 }
 
-// --- Persistent store for demo retrieval (survives refresh within same tab) ---
+// --- Persistent store for demo retrieval (localStorage = survives tabs, refresh, browser restart) ---
 const STORAGE_KEY = 'witness_demo_reports';
 const AGGREGATE_KEY = 'witness_demo_aggregates';
 
 function _loadReports() {
   try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {};
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   } catch { return {}; }
 }
 
 function _saveToStorage(token, report) {
   const reports = _loadReports();
   reports[token] = report;
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
 }
 
 function _loadAggregates() {

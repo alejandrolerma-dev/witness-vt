@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useI18n } from '../i18n';
-import TakeActionCard from '../components/TakeActionCard';
-
-export default function SaveConfirmScreen({ retrievalToken, reportData, onDone, onHome }) {
+export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
@@ -66,9 +64,6 @@ export default function SaveConfirmScreen({ retrievalToken, reportData, onDone, 
             <p className="text-xs text-amber-700">{t('auto_delete')}</p>
           </div>
         </div>
-
-        {/* Take action — encourage sending the report */}
-        <TakeActionCard advice={reportData?.advice} navigation={reportData?.navigation} />
 
         <div className="w-full flex flex-col gap-3">
           <button
