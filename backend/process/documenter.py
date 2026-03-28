@@ -153,6 +153,7 @@ SYSTEM_PROMPT = (
     "- For description_summary: write 1-3 sentences using ONLY what the student explicitly described. No added context.\n"
     "- For severity_indicator: set it to \"medium\" — the system will compute the real severity automatically.\n"
     "- Be factual and neutral. Do not editorialize.\n"
+    "- Do not use words like 'uncomfortable', 'distressed', 'upset', or any emotional language unless the student used those exact words themselves. If the student downplays the incident, report only what physically happened, not how they said they felt.\n"
     "- Output only valid JSON. No prose, no markdown, no explanation."
 )
 
