@@ -156,6 +156,7 @@ export default function App() {
       return (
         <SaveConfirmScreen
           retrievalToken={retrievalToken}
+          reportData={reportData}
           onHome={() => {
             setRawText('');
             setStructuredFields({});
