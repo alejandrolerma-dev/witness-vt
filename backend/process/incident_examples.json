@@ -1,0 +1,162 @@
+{
+  "severity_guidelines": {
+    "high": [
+      "Physical contact or assault",
+      "Direct threats or intimidation",
+      "Repeated or ongoing harassment",
+      "Stalking behavior",
+      "Property damage or vandalism",
+      "Public targeting with personal information",
+      "Creates immediate safety concerns",
+      "Interference with disability accommodations"
+    ],
+    "medium": [
+      "Verbal harassment from authority figures (professors, TAs)",
+      "Exclusion from academic activities",
+      "Hostile environment in academic or professional context",
+      "Dismissal of concerns when raised",
+      "Pattern of microaggressions",
+      "Affects academic performance or access"
+    ],
+    "low": [
+      "Single instance of insensitive comment",
+      "Appears unintentional or ignorant rather than malicious",
+      "Overheard rather than directed at the student",
+      "No pattern of behavior",
+      "No authority figure involved",
+      "Minimal impact on safety or academics"
+    ]
+  },
+  "incident_type_guidelines": {
+    "verbal": "Spoken comments, jokes, slurs, or statements made in person or over audio/video",
+    "physical": "Any unwanted physical contact, assault, blocking movement, or physical intimidation",
+    "written": "Notes, letters, flyers, posters, or other physical written materials",
+    "online": "Social media, messaging apps, email, forums, or any digital communication",
+    "property": "Vandalism, theft, damage to belongings, or interference with personal property",
+    "other": "Incidents that do not fit the above categories or involve multiple types"
+  },
+  "bias_category_guidelines": {
+    "race": "Based on racial identity, skin color, or racial stereotypes",
+    "ethnicity": "Based on ethnic background, cultural identity, or ethnic stereotypes",
+    "religion": "Based on religious beliefs, practices, or religious identity",
+    "gender": "Based on gender identity, gender expression, or gender stereotypes",
+    "sexual_orientation": "Based on sexual orientation or perceived sexual orientation",
+    "disability": "Based on physical or mental disability, accommodation needs, or disability status",
+    "national_origin": "Based on country of origin, citizenship status, accent, or nationality",
+    "other": "Based on other protected characteristics or multiple categories"
+  },
+  "examples": [
+    {
+      "raw_text": "Someone in my class made racist jokes about my ethnicity during a group discussion. The professor heard it but didn't say anything.",
+      "incident_type": "verbal",
+      "bias_category": "race",
+      "severity_indicator": "medium",
+      "reasoning": "Verbal harassment in academic setting with authority figure present but not intervening — medium because no direct threat or physical contact"
+    },
+    {
+      "raw_text": "A student pushed me and called me a slur related to my sexual orientation. This happened in the parking lot after class.",
+      "incident_type": "physical",
+      "bias_category": "sexual_orientation",
+      "severity_indicator": "high",
+      "reasoning": "Physical contact combined with verbal slur constitutes assault"
+    },
+    {
+      "raw_text": "I found graffiti with anti-Semitic symbols on my dorm room door. This is the second time this month.",
+      "incident_type": "property",
+      "bias_category": "religion",
+      "severity_indicator": "high",
+      "reasoning": "Repeated targeting of personal space with hate symbols creates unsafe environment"
+    },
+    {
+      "raw_text": "Someone created a fake social media account using my photo and posted Islamophobic content pretending to be me.",
+      "incident_type": "online",
+      "bias_category": "religion",
+      "severity_indicator": "high",
+      "reasoning": "Identity theft combined with religious harassment, potential reputational damage"
+    },
+    {
+      "raw_text": "A TA made a comment suggesting students with disabilities shouldn't be in advanced courses. I have a documented disability.",
+      "incident_type": "verbal",
+      "bias_category": "disability",
+      "severity_indicator": "medium",
+      "reasoning": "Discriminatory statement from authority figure, but not a direct threat"
+    },
+    {
+      "raw_text": "I overheard classmates making jokes about my accent and imitating the way I speak. They didn't know I could hear them.",
+      "incident_type": "verbal",
+      "bias_category": "national_origin",
+      "severity_indicator": "low",
+      "reasoning": "Offensive but not directly confrontational, overheard rather than directed, no authority figure involved"
+    },
+    {
+      "raw_text": "Someone spray-painted a homophobic slur on my car in the campus parking lot. I have photos of the damage.",
+      "incident_type": "property",
+      "bias_category": "sexual_orientation",
+      "severity_indicator": "high",
+      "reasoning": "Vandalism of personal property with hate speech, criminal damage"
+    },
+    {
+      "raw_text": "A group chat for my major has been sharing memes that mock women in STEM. When I said it made me uncomfortable, they told me to leave if I can't take a joke.",
+      "incident_type": "online",
+      "bias_category": "gender",
+      "severity_indicator": "medium",
+      "reasoning": "Hostile environment in academic context, dismissal of concerns when raised"
+    },
+    {
+      "raw_text": "During a presentation, another student made a comment implying that people from my country are terrorists. The whole class heard it.",
+      "incident_type": "verbal",
+      "bias_category": "national_origin",
+      "severity_indicator": "high",
+      "reasoning": "Public accusation of terrorism based on national origin in academic setting"
+    },
+    {
+      "raw_text": "I received an anonymous note under my door with a racial slur and a threat saying I should leave campus.",
+      "incident_type": "written",
+      "bias_category": "race",
+      "severity_indicator": "high",
+      "reasoning": "Written threat combined with racial slur, direct intimidation at residence"
+    },
+    {
+      "raw_text": "My lab partner refuses to work with me and told others it's because of my gender identity. Now no one wants to partner with me.",
+      "incident_type": "verbal",
+      "bias_category": "gender",
+      "severity_indicator": "medium",
+      "reasoning": "Exclusion from academic activities based on gender identity, affecting coursework"
+    },
+    {
+      "raw_text": "Someone keeps moving my wheelchair when I leave it outside the classroom. Yesterday they hid it in a different building.",
+      "incident_type": "property",
+      "bias_category": "disability",
+      "severity_indicator": "high",
+      "reasoning": "Repeated interference with disability accommodation equipment, creates safety risk"
+    },
+    {
+      "raw_text": "A student made an offhand comment about my religion during a casual conversation. It was ignorant but didn't seem intentionally mean.",
+      "incident_type": "verbal",
+      "bias_category": "religion",
+      "severity_indicator": "low",
+      "reasoning": "Single instance, appears unintentional, no pattern of behavior"
+    },
+    {
+      "raw_text": "I've been getting threatening DMs on Instagram from someone who knows my class schedule. They've made comments about my race and said they're watching me.",
+      "incident_type": "online",
+      "bias_category": "race",
+      "severity_indicator": "high",
+      "reasoning": "Stalking behavior combined with racial harassment and direct threats"
+    },
+    {
+      "raw_text": "During a debate in class, a student said women are naturally worse at logic. The professor didn't correct them.",
+      "incident_type": "verbal",
+      "bias_category": "gender",
+      "severity_indicator": "low",
+      "reasoning": "Biased statement in academic debate context, not targeted at a specific individual"
+    },
+    {
+      "raw_text": "Someone posted flyers around campus with hateful rhetoric about immigrants. My photo from the student directory was included on one of them.",
+      "incident_type": "written",
+      "bias_category": "national_origin",
+      "severity_indicator": "high",
+      "reasoning": "Public targeting with personal photo, widespread distribution, creates hostile environment"
+    }
+  ]
+}
