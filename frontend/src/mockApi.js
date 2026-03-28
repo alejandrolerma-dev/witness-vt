@@ -12,13 +12,16 @@ export async function createSession() {
   };
 }
 
-export async function processIncident(rawText) {
-  await delay(1500); // simulate AI processing
+export async function processIncident(rawText, structuredFields) {
+  await delay(1500);
+  // Use structured fields if provided, otherwise fall back to "Not specified"
+  const dateContext = structuredFields?.when || 'Not specified';
+  const locationContext = structuredFields?.where || 'Not specified';
   return {
     incident_record: {
       incident_type: "verbal",
-      date_context: "Last Tuesday evening",
-      location_context: "Torgersen Hall, 3rd floor",
+      date_context: dateContext,
+      location_context: locationContext,
       bias_category: "race",
       description_summary:
         "A student reported being subjected to racially charged remarks during a study group session. The remarks were directed at the student and made in front of peers.",
@@ -31,14 +34,14 @@ export async function processIncident(rawText) {
         "As a Virginia Tech student, you have the right to report this incident to the Bias Response Team without fear of retaliation. The team will review your report confidentially and connect you with appropriate support resources. You may also choose to pursue a formal complaint through the Office for Equity and Accessibility. You are not required to identify yourself in your initial report.",
       vt_contact: {
         office: "Virginia Tech Bias Response Team",
-        url: "https://bias.vt.edu",
+        url: "https://www.inclusive.vt.edu/resources/brt.html",
       },
     },
     navigation: {
       reporting_steps: [
         {
           step_number: 1,
-          action: "Submit an online report to the Bias Response Team at bias.vt.edu",
+          action: "Submit an online report to the Bias Response Team at inclusive.vt.edu/resources/brt.html",
           estimated_timeline: "Can be done immediately, 24/7",
         },
         {

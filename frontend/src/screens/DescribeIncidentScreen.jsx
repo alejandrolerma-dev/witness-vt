@@ -6,8 +6,11 @@ import ZeroPIIBadge from '../components/ZeroPIIBadge';
 const MAX_CHARS = 5000;
 const WARN_CHARS = 4800;
 
-export default function DescribeIncidentScreen({ onSubmit, onBack, onExit, initialText = '' }) {
+export default function DescribeIncidentScreen({ onSubmit, onBack, onExit, initialText = '', initialFields = {} }) {
   const [text, setText] = useState(initialText);
+  const [when, setWhen] = useState(initialFields.when || '');
+  const [where, setWhere] = useState(initialFields.where || '');
+  const [witnesses, setWitnesses] = useState(initialFields.witnesses ?? null); // null = not answered
   const [error, setError] = useState('');
 
   const count = text.length;
@@ -18,8 +21,10 @@ export default function DescribeIncidentScreen({ onSubmit, onBack, onExit, initi
     if (isEmpty) { setError('Please describe the incident before continuing.'); return; }
     if (isOverLimit) { setError('Please shorten your description to under 5000 characters.'); return; }
     setError('');
-    onSubmit(text);
+    onSubmit(text, { when: when.trim() || null, where: where.trim() || null, witnesses });
   }
+
+  const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent";
 
   return (
     <ScreenLayout onExit={onExit} step={0}>
@@ -37,16 +42,14 @@ export default function DescribeIncidentScreen({ onSubmit, onBack, onExit, initi
           </div>
         </div>
 
-        {/* Textarea card */}
+        {/* Main textarea */}
         <div className="bg-white rounded-3xl shadow-card overflow-hidden">
           <textarea
             value={text}
             onChange={e => { setText(e.target.value); setError(''); }}
             maxLength={MAX_CHARS}
-            placeholder="Describe what happened, where it occurred, and how it made you feel. You don't need to include anyone's name or personal details."
-            className={`w-full p-5 text-sm text-slate-700 placeholder-slate-300 resize-none h-52 focus:outline-none leading-relaxed ${
-              isOverLimit ? 'bg-red-50' : 'bg-white'
-            }`}
+            placeholder="Describe what happened and how it made you feel. You don't need to include anyone's name or personal details."
+            className={`w-full p-5 text-sm text-slate-700 placeholder-slate-300 resize-none h-44 focus:outline-none leading-relaxed ${isOverLimit ? 'bg-red-50' : 'bg-white'}`}
           />
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50">
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -58,6 +61,72 @@ export default function DescribeIncidentScreen({ onSubmit, onBack, onExit, initi
             <span className={`text-xs font-medium ${count > WARN_CHARS ? 'text-red-500' : 'text-slate-400'}`}>
               {count.toLocaleString()} / 5,000
             </span>
+          </div>
+        </div>
+
+        {/* Optional structured fields */}
+        <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-slate-700">Additional details</p>
+            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">optional</span>
+          </div>
+          <p className="text-xs text-slate-400 -mt-2">
+            These help us give you more accurate information. Leave blank if you prefer.
+          </p>
+
+          {/* When */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              When did this happen?
+            </label>
+            <input
+              type="text"
+              value={when}
+              onChange={e => setWhen(e.target.value)}
+              placeholder="e.g. Last Tuesday, October 15, around 3pm"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Where */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              Where did this happen?
+            </label>
+            <input
+              type="text"
+              value={where}
+              onChange={e => setWhere(e.target.value)}
+              placeholder="e.g. Torgersen Hall, online, dining hall"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Witnesses */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              Were there witnesses?
+            </label>
+            <div className="flex gap-2">
+              {[
+                { value: true, label: 'Yes' },
+                { value: false, label: 'No' },
+                { value: null, label: 'Not sure' },
+              ].map(({ value, label }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setWitnesses(value)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    witnesses === value
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

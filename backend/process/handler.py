@@ -48,6 +48,7 @@ def handler(event, context):
         body = {}
 
     raw_text = body.get("raw_text", "")
+    structured_fields = body.get("structured_fields")  # optional: {when, where, witnesses}
 
     # --- Validate raw_text ---
     if not isinstance(raw_text, str) or not raw_text.strip() or len(raw_text) > 5000:
@@ -70,7 +71,7 @@ def handler(event, context):
 
     # Step 1: Documenter
     try:
-        incident_record = document(raw_text)
+        incident_record = document(raw_text, structured_fields)
     except (DocumenterError, BedrockError):
         logger.info(json.dumps({"status": 502, "failed_agent": "documenter"}))
         return _response(502, {

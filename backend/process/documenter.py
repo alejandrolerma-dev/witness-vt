@@ -32,6 +32,10 @@ SYSTEM_PROMPT = (
     "You are a structured data extractor for a bias incident reporting system.\n"
     "Your job is to convert a student's plain-text incident description into a structured JSON record.\n"
     "Rules:\n"
+    "- CRITICAL: Only extract information that is EXPLICITLY stated by the student. Never infer, assume, or invent details.\n"
+    "- If the student did not mention a date or time, set date_context to \"Not specified\".\n"
+    "- If the student did not mention a location, set location_context to \"Not specified\".\n"
+    "- If additional structured fields (when, where, witnesses) are provided separately, use those values directly.\n"
     "- Remove or replace any names, email addresses, VT IDs, phone numbers, or other identifying information with \"[REDACTED]\".\n"
     "- Do not include any PII in your output.\n"
     "- Be factual and neutral. Do not editorialize.\n"
@@ -43,7 +47,8 @@ _USER_TEMPLATE = (
     "Incident description:\n"
     "<incident>\n"
     "{raw_text}\n"
-    "</incident>"
+    "</incident>\n"
+    "{structured_fields}"
 )
 
 
@@ -51,15 +56,26 @@ class DocumenterError(Exception):
     """Raised when the Documenter agent cannot produce a valid Incident_Record."""
 
 
-def document(raw_text: str) -> dict:
+def document(raw_text: str, structured_fields: dict | None = None) -> dict:
     """
     Convert raw incident text into a validated Incident_Record dict.
 
-    Raises:
-        DocumenterError: JSON parse failure or missing required fields.
-        BedrockError: Bedrock invocation failure (re-raised as-is).
+    structured_fields: optional dict with keys: when, where, witnesses
     """
-    user_message = _USER_TEMPLATE.format(raw_text=raw_text)
+    # Build structured fields block if provided
+    fields_block = ""
+    if structured_fields:
+        lines = []
+        if structured_fields.get("when"):
+            lines.append(f"When it happened (provided by student): {structured_fields['when']}")
+        if structured_fields.get("where"):
+            lines.append(f"Where it happened (provided by student): {structured_fields['where']}")
+        if structured_fields.get("witnesses") is not None:
+            lines.append(f"Witnesses present: {'Yes' if structured_fields['witnesses'] else 'No'}")
+        if lines:
+            fields_block = "\n\nAdditional details provided by the student:\n" + "\n".join(lines)
+
+    user_message = _USER_TEMPLATE.format(raw_text=raw_text, structured_fields=fields_block)
 
     # BedrockError propagates unchanged — caller handles it
     response_text = invoke(SYSTEM_PROMPT, user_message)

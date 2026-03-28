@@ -10,11 +10,34 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # ---------------------------------------------------------------------------
-# Valid policies
+# Valid policies and their canonical contact info
 # ---------------------------------------------------------------------------
 VALID_POLICIES = {"Honor Code", "Title IX", "Bias Response Team", "Dean of Students"}
 
 REQUIRED_FIELDS = {"matched_policy", "policy_ambiguous", "rights_summary", "vt_contact"}
+
+_POLICY_CONTACTS = {
+    "Bias Response Team": {
+        "office": "Virginia Tech Bias Response Team",
+        "url": "https://www.inclusive.vt.edu/resources/brt.html",
+    },
+    "Title IX": {
+        "office": "Virginia Tech Title IX Office",
+        "url": "https://titleix.vt.edu",
+    },
+    "Honor Code": {
+        "office": "Virginia Tech Office of Academic Integrity",
+        "url": "https://honorsystem.vt.edu",
+    },
+    "Dean of Students": {
+        "office": "Virginia Tech Dean of Students Office",
+        "url": "https://dos.vt.edu",
+    },
+}
+
+# Deterministic routing — bias_category → policy
+_BRT_CATEGORIES = {"race", "ethnicity", "religion", "national_origin", "disability", "other"}
+_TITLEIX_CATEGORIES = {"gender", "sexual_orientation"}
 
 # ---------------------------------------------------------------------------
 # Prompts
@@ -24,7 +47,12 @@ SYSTEM_PROMPT = (
     "Your job is to match a structured bias incident record to the most relevant VT policy and explain the student's rights in plain English.\n"
     "Rules:\n"
     "- Choose exactly one policy from: Honor Code, Title IX, Bias Response Team, Dean of Students.\n"
-    "- If no policy clearly matches, default to Bias Response Team and note the ambiguity.\n"
+    "- Use this mapping as your primary guide:\n"
+    "  * bias, race, ethnicity, religion, national_origin, disability → Bias Response Team\n"
+    "  * gender, sexual_orientation, sexual harassment, sexual assault → Title IX\n"
+    "  * academic misconduct, cheating, plagiarism, grade disputes → Honor Code\n"
+    "  * general harassment, bullying, interpersonal conflict → Dean of Students\n"
+    "- If no policy clearly matches, default to Bias Response Team and set policy_ambiguous to true.\n"
     "- Write the rights summary in plain English, under 300 words.\n"
     "- Do not include any PII. Do not reference names or identifiers.\n"
     "- Output only valid JSON matching the schema below. No prose, no markdown."
@@ -43,6 +71,16 @@ class AdvisorError(Exception):
     """Raised when the Advisor agent cannot produce a valid advice response."""
 
 
+def _deterministic_policy(incident_record: dict) -> str | None:
+    """Return a policy based on bias_category without calling the LLM, or None to let LLM decide."""
+    bias_cat = incident_record.get("bias_category", "")
+    if bias_cat in _BRT_CATEGORIES:
+        return "Bias Response Team"
+    if bias_cat in _TITLEIX_CATEGORIES:
+        return "Title IX"
+    return None
+
+
 def advise(incident_record: dict) -> dict:
     """
     Match an Incident_Record to a VT policy and return a validated advice dict.
@@ -54,7 +92,6 @@ def advise(incident_record: dict) -> dict:
     incident_record_json = json.dumps(incident_record)
     user_message = _USER_TEMPLATE.format(incident_record_json=incident_record_json)
 
-    # BedrockError propagates unchanged — caller handles it
     response_text = invoke(SYSTEM_PROMPT, user_message)
 
     try:
@@ -78,5 +115,16 @@ def advise(incident_record: dict) -> dict:
     if advice["matched_policy"] not in VALID_POLICIES:
         advice["matched_policy"] = "Bias Response Team"
         advice["policy_ambiguous"] = True
+
+    # Override with deterministic routing — prevents LLM from picking wrong office
+    deterministic = _deterministic_policy(incident_record)
+    if deterministic:
+        advice["matched_policy"] = deterministic
+        advice["policy_ambiguous"] = False
+
+    # Always use canonical contact info — prevents hallucinated URLs
+    policy = advice["matched_policy"]
+    if policy in _POLICY_CONTACTS:
+        advice["vt_contact"] = _POLICY_CONTACTS[policy]
 
     return advice

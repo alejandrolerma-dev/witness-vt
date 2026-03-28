@@ -71,10 +71,14 @@ async function _createSession() {
   return apiFetch("/session", { method: "POST" });
 }
 
-async function _processIncident(rawText) {
+async function _processIncident(rawText, structuredFields) {
+  const body = { raw_text: rawText };
+  if (structuredFields && Object.values(structuredFields).some(v => v !== null && v !== undefined)) {
+    body.structured_fields = structuredFields;
+  }
   return apiFetch("/report/process", {
     method: "POST",
-    body: JSON.stringify({ raw_text: rawText }),
+    body: JSON.stringify(body),
   });
 }
 

@@ -17,6 +17,7 @@ export default function App() {
 
   const [screen, setScreen] = useState('landing');
   const [rawText, setRawText] = useState('');
+  const [structuredFields, setStructuredFields] = useState({});
   const [reportData, setReportData] = useState(null);
   const [retrievalToken, setRetrievalToken] = useState('');
   const [errorState, setErrorState] = useState(null);
@@ -24,17 +25,19 @@ export default function App() {
   function handleExit() {
     clearSession();
     setRawText('');
+    setStructuredFields({});
     setReportData(null);
     setRetrievalToken('');
     setErrorState(null);
     setScreen('exit');
   }
 
-  async function handleDescribeSubmit(text) {
+  async function handleDescribeSubmit(text, fields) {
     setRawText(text);
+    setStructuredFields(fields || {});
     setScreen('processing');
     try {
-      const data = await processIncident(text);
+      const data = await processIncident(text, fields);
       setReportData(data);
       setScreen('review_documenter');
     } catch (err) {
@@ -76,6 +79,7 @@ export default function App() {
       return (
         <DescribeIncidentScreen
           initialText={rawText}
+          initialFields={structuredFields}
           onSubmit={handleDescribeSubmit}
           onBack={() => setScreen('landing')}
           onExit={handleExit}
