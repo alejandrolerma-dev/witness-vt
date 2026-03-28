@@ -25,12 +25,50 @@ export default function App() {
   const [errorState, setErrorState] = useState(null);
   const [retrievedReport, setRetrievedReport] = useState(null);
 
-  // Auto-retrieve if URL has ?token= parameter (from QR code scan)
+  // Auto-retrieve from URL: ?r= (embedded report data from QR) or ?token= (storage lookup)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Option 1: Full report embedded in URL (from QR code — works cross-device)
+    const encodedReport = params.get('r');
+    if (encodedReport) {
+      try {
+        const json = decodeURIComponent(escape(atob(encodedReport)));
+        const compact = JSON.parse(json);
+        // Expand compact format back to full report
+        const report = {
+          incident_record: {
+            incident_type: compact.i?.t,
+            date_context: compact.i?.d,
+            location_context: compact.i?.l,
+            bias_category: compact.i?.b,
+            description_summary: compact.i?.s,
+            severity_indicator: compact.i?.v,
+          },
+          advice: {
+            matched_policy: compact.a?.p,
+            rights_summary: compact.a?.r,
+            vt_contact: compact.a?.c,
+            policy_ambiguous: false,
+          },
+          navigation: {
+            reporting_steps: (compact.n?.s || []).map(s => ({ step_number: s.n, action: s.a, estimated_timeline: s.t })),
+            draft_statement: compact.n?.d,
+          },
+          saved_at: new Date().toISOString(),
+        };
+        window.history.replaceState({}, '', window.location.pathname);
+        setRetrievedReport(report);
+        setScreen('retrieved');
+        return;
+      } catch {
+        // Ignore decode errors — fall through to token check
+      }
+    }
+
+    // Option 2: Token-based lookup (same-browser localStorage)
     const urlToken = params.get('token');
     if (urlToken && sessionStatus === 'ready') {
-      // Clear the URL param so refreshing doesn't re-trigger
       window.history.replaceState({}, '', window.location.pathname);
       handleRetrieve(urlToken).catch(() => {});
     }

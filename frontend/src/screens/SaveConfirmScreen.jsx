@@ -1,9 +1,50 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useI18n } from '../i18n';
-export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
+
+function compactReport(reportData) {
+  if (!reportData) return null;
+  const ir = reportData.incident_record || {};
+  const ad = reportData.advice || {};
+  const nav = reportData.navigation || {};
+  // Keep only essential fields to fit in QR (~1-2KB)
+  return {
+    i: {
+      t: ir.incident_type,
+      d: ir.date_context,
+      l: ir.location_context,
+      b: ir.bias_category,
+      s: ir.description_summary,
+      v: ir.severity_indicator,
+    },
+    a: {
+      p: ad.matched_policy,
+      r: ad.rights_summary,
+      c: ad.vt_contact,
+    },
+    n: {
+      s: (nav.reporting_steps || []).map(s => ({ n: s.step_number, a: s.action, t: s.estimated_timeline })),
+      d: nav.draft_statement,
+    },
+  };
+}
+
+export default function SaveConfirmScreen({ retrievalToken, reportData, onDone, onHome }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
+
+  // Build QR URL with embedded report data
+  const qrUrl = useMemo(() => {
+    const compact = compactReport(reportData);
+    if (!compact) return `https://witness-vt.vercel.app?token=${encodeURIComponent(retrievalToken)}`;
+    try {
+      const json = JSON.stringify(compact);
+      const encoded = btoa(unescape(encodeURIComponent(json)));
+      return `https://witness-vt.vercel.app?r=${encoded}`;
+    } catch {
+      return `https://witness-vt.vercel.app?token=${encodeURIComponent(retrievalToken)}`;
+    }
+  }, [reportData, retrievalToken]);
 
   function handleCopy() {
     navigator.clipboard.writeText(retrievalToken);
@@ -26,13 +67,30 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">{t('report_saved')}</h1>
           <p className="text-white/50 text-sm leading-relaxed">
-            Use this token to retrieve your report later.
+            Scan the QR code on any device to view your report.
           </p>
         </div>
         <div className="w-full bg-white rounded-3xl shadow-card p-5 flex flex-col gap-3">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{t('retrieval_token')}</p>
-          <div className="bg-slate-50 rounded-2xl px-4 py-3 font-mono text-sm text-slate-700 break-all border border-slate-100">
-            {retrievalToken}
+          {/* QR Code — contains the full report data */}
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Scan to view your report</p>
+            <div className="bg-white p-3 rounded-2xl border border-slate-100">
+              <QRCodeSVG
+                value={qrUrl}
+                size={180}
+                level="L"
+                bgColor="#ffffff"
+                fgColor="#1a1f36"
+              />
+            </div>
+            <p className="text-xs text-slate-400">Works on any device — your report is embedded in the code</p>
+          </div>
+
+          <div className="border-t border-slate-100 pt-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{t('retrieval_token')}</p>
+            <div className="bg-slate-50 rounded-2xl px-4 py-3 font-mono text-sm text-slate-700 break-all border border-slate-100">
+              {retrievalToken}
+            </div>
           </div>
           <button
             onClick={handleCopy}
@@ -40,20 +98,6 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
           >
             {copied ? t('copied') : t('copy_token')}
           </button>
-
-          {/* QR Code */}
-          <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-100">
-            <p className="text-xs text-slate-400">{t('qr_screenshot')}</p>
-            <div className="bg-white p-3 rounded-2xl border border-slate-100">
-              <QRCodeSVG
-                value={`https://witness-vt.vercel.app?token=${encodeURIComponent(retrievalToken)}`}
-                size={140}
-                level="M"
-                bgColor="#ffffff"
-                fgColor="#1a1f36"
-              />
-            </div>
-          </div>
 
           <p className="text-xs text-slate-400 text-center">No personal information was stored.</p>
           <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-3 py-2.5 border border-amber-100">
