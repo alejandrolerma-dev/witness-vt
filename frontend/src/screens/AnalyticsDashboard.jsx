@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAnalytics } from '../api';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // --- SVG Bar Chart ---
 function BarChart({ data, labelKey, valueKey, color = '#6366f1', maxBarWidth = 200 }) {
@@ -117,58 +119,43 @@ function TrendChart({ data, labelKey, valueKey, color = '#6366f1' }) {
   );
 }
 
-// --- Campus Heatmap with VT campus map ---
+// --- Campus Heatmap with real Leaflet map ---
 
-// VT campus buildings — positioned on the SVG map
-const CAMPUS_BUILDINGS = [
-  { name: 'Burruss', x: 125, y: 115, w: 28, h: 16 },
-  { name: 'Torgersen', x: 150, y: 68, w: 30, h: 14 },
-  { name: 'Newman Library', x: 210, y: 82, w: 34, h: 16 },
-  { name: 'Goodwin', x: 235, y: 120, w: 26, h: 14 },
-  { name: 'McBryde', x: 80, y: 95, w: 28, h: 14 },
-  { name: 'Squires', x: 160, y: 158, w: 28, h: 14 },
-  { name: 'War Memorial', x: 135, y: 48, w: 30, h: 12 },
-  { name: 'Norris', x: 90, y: 135, w: 24, h: 12 },
-  { name: 'Dietrick', x: 200, y: 160, w: 26, h: 12 },
-  { name: 'Owens', x: 240, y: 155, w: 22, h: 12 },
-  { name: 'Residence Halls', x: 260, y: 55, w: 36, h: 14 },
-];
-
-// Map building names to SVG positions for heatmap overlay
-const LOCATION_TO_POS = {
-  'torgersen hall':         { x: 165, y: 72 },
-  'torgersen':              { x: 165, y: 72 },
-  'newman library':         { x: 227, y: 88 },
-  'newman':                 { x: 227, y: 88 },
-  'squires student center': { x: 174, y: 163 },
-  'squires':                { x: 174, y: 163 },
-  'goodwin hall':           { x: 248, y: 125 },
-  'goodwin':                { x: 248, y: 125 },
-  'mcbryde hall':           { x: 94, y: 100 },
-  'mcbryde':                { x: 94, y: 100 },
-  'drill field':            { x: 160, y: 115 },
-  'dietrick':               { x: 213, y: 164 },
-  'd2':                     { x: 213, y: 164 },
-  'owens':                  { x: 251, y: 159 },
-  'burruss':                { x: 139, y: 121 },
-  'norris':                 { x: 102, y: 139 },
-  'residence halls':        { x: 278, y: 60 },
-  'war memorial':           { x: 150, y: 52 },
+// Known VT campus locations → real lat/lng coordinates
+const LOCATION_COORDS = {
+  'torgersen hall':         [37.22965, -80.42040],
+  'torgersen':              [37.22965, -80.42040],
+  'newman library':         [37.22925, -80.41860],
+  'newman':                 [37.22925, -80.41860],
+  'squires student center': [37.22720, -80.42100],
+  'squires':                [37.22720, -80.42100],
+  'goodwin hall':           [37.23040, -80.41980],
+  'goodwin':                [37.23040, -80.41980],
+  'mcbryde hall':           [37.22850, -80.42450],
+  'mcbryde':                [37.22850, -80.42450],
+  'drill field':            [37.22780, -80.42250],
+  'dietrick':               [37.22460, -80.42200],
+  'd2':                     [37.22460, -80.42200],
+  'owens':                  [37.22500, -80.41900],
+  'burruss':                [37.22870, -80.42330],
+  'norris':                 [37.22920, -80.42520],
+  'residence halls':        [37.23100, -80.41950],
+  'war memorial':           [37.23050, -80.42280],
 };
 
-function matchPosition(locStr) {
+function matchCoords(locStr) {
   if (!locStr) return null;
   const lower = locStr.toLowerCase();
-  for (const [name, pos] of Object.entries(LOCATION_TO_POS)) {
-    if (lower.includes(name)) return pos;
+  for (const [name, coords] of Object.entries(LOCATION_COORDS)) {
+    if (lower.includes(name)) return coords;
   }
   return null;
 }
 
 function CampusHeatmap({ locations }) {
   const mapped = locations
-    .map(l => ({ ...l, pos: matchPosition(l.location) }))
-    .filter(l => l.pos);
+    .map(l => ({ ...l, coords: matchCoords(l.location) }))
+    .filter(l => l.coords);
 
   if (mapped.length === 0) return null;
 
@@ -176,55 +163,44 @@ function CampusHeatmap({ locations }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <svg viewBox="0 0 320 220" className="w-full rounded-2xl overflow-hidden" style={{ background: '#e8f0e4' }}>
-        {/* Roads */}
-        <line x1="0" y1="110" x2="320" y2="110" stroke="#d4d4d4" strokeWidth="4" opacity="0.6" />
-        <line x1="160" y1="0" x2="160" y2="220" stroke="#d4d4d4" strokeWidth="3" opacity="0.5" />
-        <line x1="60" y1="0" x2="100" y2="220" stroke="#d4d4d4" strokeWidth="2.5" opacity="0.4" />
-        <line x1="260" y1="0" x2="240" y2="220" stroke="#d4d4d4" strokeWidth="2.5" opacity="0.4" />
-        <line x1="0" y1="55" x2="320" y2="55" stroke="#d4d4d4" strokeWidth="2" opacity="0.3" />
-        <line x1="0" y1="165" x2="320" y2="165" stroke="#d4d4d4" strokeWidth="2" opacity="0.3" />
-
-        {/* Drill Field — large oval green space */}
-        <ellipse cx="160" cy="115" rx="50" ry="30" fill="#c8dcc0" stroke="#a3c49a" strokeWidth="1.5" />
-        <text x="160" y="118" textAnchor="middle" style={{ fontSize: 7, fontWeight: 600, fill: '#6b8f63' }}>
-          Drill Field
-        </text>
-
-        {/* Buildings */}
-        {CAMPUS_BUILDINGS.map(b => (
-          <g key={b.name}>
-            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="2" fill="#c4b5a0" stroke="#a89880" strokeWidth="0.8" opacity="0.7" />
-            <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 3} textAnchor="middle" style={{ fontSize: 5, fontWeight: 600, fill: '#5c4f3d' }}>
-              {b.name}
-            </text>
-          </g>
-        ))}
-
-        {/* Campus label */}
-        <text x="160" y="14" textAnchor="middle" style={{ fontSize: 9, fontWeight: 700, fill: '#64748b', letterSpacing: '1px' }}>
-          VIRGINIA TECH CAMPUS
-        </text>
-
-        {/* Heatmap dots */}
-        {mapped.map((loc) => {
-          const intensity = loc.count / maxCount;
-          const r = 10 + intensity * 22;
-          const opacity = 0.2 + intensity * 0.35;
-          return (
-            <g key={loc.location}>
-              <circle cx={loc.pos.x} cy={loc.pos.y} r={r} fill="#ef4444" opacity={opacity} />
-              <circle cx={loc.pos.x} cy={loc.pos.y} r={4.5} fill="#ef4444" opacity={0.85} stroke="white" strokeWidth="1" />
-              <text x={loc.pos.x} y={loc.pos.y - r - 3} textAnchor="middle" style={{ fontSize: 7, fontWeight: 700, fill: '#1e293b' }}>
-                {loc.location}
-              </text>
-              <text x={loc.pos.x} y={loc.pos.y + 3} textAnchor="middle" style={{ fontSize: 6, fontWeight: 700, fill: 'white' }}>
-                {loc.count}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      <div className="rounded-2xl overflow-hidden border border-slate-200" style={{ height: 300 }}>
+        <MapContainer
+          center={[37.2284, -80.4214]}
+          zoom={15}
+          scrollWheelZoom={false}
+          dragging={true}
+          zoomControl={true}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {mapped.map((loc) => {
+            const intensity = loc.count / maxCount;
+            const radius = 12 + intensity * 28;
+            return (
+              <CircleMarker
+                key={loc.location}
+                center={loc.coords}
+                radius={radius}
+                pathOptions={{
+                  color: '#dc2626',
+                  fillColor: '#ef4444',
+                  fillOpacity: 0.25 + intensity * 0.35,
+                  weight: 2,
+                }}
+              >
+                <Tooltip permanent direction="top" offset={[0, -radius]}>
+                  <span style={{ fontWeight: 700, fontSize: 12 }}>{loc.location}</span>
+                  <br />
+                  <span style={{ fontSize: 11, color: '#dc2626' }}>{loc.count} {loc.count === 1 ? 'report' : 'reports'}</span>
+                </Tooltip>
+              </CircleMarker>
+            );
+          })}
+        </MapContainer>
+      </div>
       <p className="text-xs text-slate-400 text-center">Larger circles indicate higher incident concentration</p>
     </div>
   );
