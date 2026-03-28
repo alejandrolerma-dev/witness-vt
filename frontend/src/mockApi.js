@@ -12,23 +12,50 @@ export async function createSession() {
   };
 }
 
+function detectIncidentType(text) {
+  const t = text.toLowerCase();
+  if (/assault|hit|punch|push|shov|kick|grab|touch|attack|physical/.test(t)) return "physical";
+  if (/post|tweet|messag|text|email|online|social media|instagram|facebook|dm|comment/.test(t)) return "online";
+  if (/note|sign|written|graffiti|letter|flyer|poster/.test(t)) return "written";
+  if (/damage|vandal|destroy|broke|stolen|property/.test(t)) return "property";
+  if (/said|told|called|slur|remark|comment|verbal|yell|shout|spoke/.test(t)) return "verbal";
+  return "other";
+}
+
+function detectBiasCategory(text) {
+  const t = text.toLowerCase();
+  if (/race|racial|racist|black|white|asian|hispanic|latino|african/.test(t)) return "race";
+  if (/religion|religious|muslim|jewish|christian|hindu|faith|pray/.test(t)) return "religion";
+  if (/gender|woman|man|female|male|sexist|misogyn/.test(t)) return "gender";
+  if (/gay|lesbian|queer|lgbt|sexual orientation|homophob/.test(t)) return "sexual_orientation";
+  if (/disabilit|disabled|wheelchair|blind|deaf/.test(t)) return "disability";
+  if (/ethnic|ethnicity|national origin|immigrant|foreign/.test(t)) return "ethnicity";
+  return "other";
+}
+
+function detectSeverity(text) {
+  const t = text.toLowerCase();
+  if (/assault|attack|threat|weapon|physical|hit|punch|push|shov|kick|unsafe|scared|fear/.test(t)) return "high";
+  if (/remark|comment|slur|discriminat|hostile|harass/.test(t)) return "medium";
+  return "low";
+}
+
 export async function processIncident(rawText, structuredFields) {
   await delay(1500);
   const dateContext = structuredFields?.when || 'Not specified';
   const locationContext = structuredFields?.where || 'Not specified';
-  // Derive a real summary from what the user typed (first 200 chars, trimmed)
   const trimmed = rawText.trim();
   const summary = trimmed.length > 180
     ? trimmed.slice(0, 180).replace(/\s+\S*$/, '') + '…'
     : trimmed;
   return {
     incident_record: {
-      incident_type: "verbal",
+      incident_type: detectIncidentType(rawText),
       date_context: dateContext,
       location_context: locationContext,
-      bias_category: "race",
+      bias_category: detectBiasCategory(rawText),
       description_summary: summary,
-      severity_indicator: "medium",
+      severity_indicator: detectSeverity(rawText),
     },
     advice: {
       matched_policy: "Bias Response Team",
