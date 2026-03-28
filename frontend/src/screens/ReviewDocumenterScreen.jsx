@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ScreenLayout from '../components/ScreenLayout';
 import ZeroPIIBadge from '../components/ZeroPIIBadge';
 import EmergencyBanner from '../components/EmergencyBanner';
+import { useI18n } from '../i18n';
 
 const SEVERITY_STYLES = {
   high:   { pill: 'bg-red-50 text-red-600 border-red-100',    label: '⚠️ High' },
@@ -27,6 +28,7 @@ const STATIC_FIELDS = [
 ];
 
 export default function ReviewDocumenterScreen({ incidentRecord, emergency, onContinue, onBack, onExit }) {
+  const { t } = useI18n();
   const [summary, setSummary] = useState(incidentRecord?.description_summary ?? '');
   const [editingSummary, setEditingSummary] = useState(false);
 
@@ -127,14 +129,14 @@ export default function ReviewDocumenterScreen({ incidentRecord, emergency, onCo
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>
-            Back
+            {t('back')}
           </button>
           <button
             onClick={handleContinue}
             className="flex-1 py-4 rounded-2xl text-sm font-semibold text-white transition-all"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
           >
-            This looks right — continue
+            {t('looks_right')}
           </button>
         </div>
       </div>

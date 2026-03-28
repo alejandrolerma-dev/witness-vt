@@ -47,7 +47,7 @@ export default function SaveConfirmScreen({ retrievalToken, onDone, onHome }) {
             <p className="text-xs text-slate-400">{t('qr_screenshot')}</p>
             <div className="bg-white p-3 rounded-2xl border border-slate-100">
               <QRCodeSVG
-                value={`${window.location.origin}?token=${encodeURIComponent(retrievalToken)}`}
+                value={`https://witness-vt.vercel.app?token=${encodeURIComponent(retrievalToken)}`}
                 size={140}
                 level="M"
                 bgColor="#ffffff"
