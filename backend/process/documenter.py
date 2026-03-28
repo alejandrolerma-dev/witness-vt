@@ -1,8 +1,10 @@
 """
 Documenter agent — converts raw incident text into a structured Incident_Record JSON.
+Uses few-shot examples from incident_examples.json for accurate classification.
 """
 import json
 import logging
+import os
 
 from shared.bedrock_client import invoke, BedrockError
 
@@ -10,7 +12,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # ---------------------------------------------------------------------------
-# Valid enum values for Incident_Record fields
+# Valid enum values
 # ---------------------------------------------------------------------------
 VALID_INCIDENT_TYPES = {"verbal", "physical", "written", "online", "property", "other"}
 VALID_BIAS_CATEGORIES = {"race", "ethnicity", "religion", "gender", "sexual_orientation", "disability", "national_origin", "other"}
@@ -26,33 +28,62 @@ REQUIRED_FIELDS = {
 }
 
 # ---------------------------------------------------------------------------
+# Load few-shot examples once at module level
+# ---------------------------------------------------------------------------
+def _load_examples() -> str:
+    """Load incident examples and format them as few-shot prompt context."""
+    try:
+        examples_path = os.path.join(os.path.dirname(__file__), "incident_examples.json")
+        with open(examples_path, "r") as f:
+            data = json.load(f)
+
+        lines = ["CLASSIFICATION GUIDELINES:", ""]
+
+        # Critical rules first
+        if data.get("critical_rules"):
+            lines.append("CRITICAL RULES (always apply these):")
+            for rule in data["critical_rules"]:
+                lines.append(f"  - {rule}")
+            lines.append("")
+
+        # Severity guidelines
+        lines.append("Severity levels:")
+        for level, criteria in data["severity_guidelines"].items():
+            lines.append(f"  {level.upper()}: " + "; ".join(criteria[:3]))
+        lines.append("")
+
+        # Few-shot examples (first 8 for better coverage)
+        lines.append("EXAMPLES (calibrate your classifications against these):")
+        for ex in data["examples"][:8]:
+            lines.append(f'Input: "{ex["raw_text"]}"')
+            lines.append(f'→ incident_type: {ex["incident_type"]}, bias_category: {ex["bias_category"]}, severity_indicator: {ex["severity_indicator"]}')
+            lines.append(f'  Reason: {ex["reasoning"]}')
+            lines.append("")
+
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
+_FEW_SHOT_CONTEXT = _load_examples()
+
+# ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
 SYSTEM_PROMPT = (
-    "You are a structured data extractor for a bias incident reporting system.\n"
-    "Your job is to convert a student's plain-text incident description into a structured JSON record.\n"
-    "Rules:\n"
-    "- CRITICAL: Only extract information that is EXPLICITLY stated by the student. Never infer, assume, or invent details.\n"
+    "You are a structured data extractor for a bias incident reporting system at Virginia Tech.\n"
+    "Your job is to convert a student's plain-text incident description into a structured JSON record.\n\n"
+    + _FEW_SHOT_CONTEXT + "\n"
+    "RULES:\n"
+    "- CRITICAL: Only extract information EXPLICITLY stated by the student. Never infer, assume, or invent details.\n"
     "- If the student did not mention a date or time, set date_context to \"Not specified\".\n"
     "- If the student did not mention a location, set location_context to \"Not specified\".\n"
-    "- If additional structured fields (when, where, witnesses) are provided separately, use those values directly.\n"
-    "- Remove or replace any names, email addresses, VT IDs, phone numbers, or other identifying information with \"[REDACTED]\".\n"
-    "- Do not include any PII in your output.\n"
+    "- If additional structured fields (when, where, witnesses) are provided, use those values directly.\n"
+    "- Remove or replace any names, email addresses, VT IDs, phone numbers with \"[REDACTED]\".\n"
+    "- For description_summary: write 1-3 sentences using ONLY what the student explicitly described. No added context.\n"
+    "- For severity_indicator: use the guidelines and examples above. Default to 'medium' if unclear — do NOT default to 'high'.\n"
     "- Be factual and neutral. Do not editorialize.\n"
-    "- For incident_type, classify based on the PRIMARY action described:\n"
-    "  * verbal: spoken words, comments, slurs, verbal harassment\n"
-    "  * physical: physical contact, assault, blocking, touching\n"
-    "  * written: notes, letters, graffiti, written messages\n"
-    "  * online: social media, email, messaging apps, websites\n"
-    "  * property: theft, vandalism, damage to belongings\n"
-    "  * other: anything that doesn't fit the above categories\n"
-    "- For description_summary: write a 1-3 sentence neutral summary using ONLY what the student explicitly described. Do not add context, assumptions, or details not present in the text.\n"
-    "- For severity_indicator, use these criteria strictly:\n"
-    "  * high: explicit physical threat, physical assault, or repeated targeted harassment described\n"
-    "  * medium: verbal bias incident, discriminatory remarks, or single hostile interaction\n"
-    "  * low: ambiguous situation, microaggression, or uncertain if bias-motivated\n"
-    "  * Default to medium if unclear — do NOT default to high.\n"
-    "- Output only valid JSON matching the schema below. No prose, no markdown."
+    "- Output only valid JSON. No prose, no markdown, no explanation."
 )
 
 _USER_TEMPLATE = (
@@ -75,7 +106,6 @@ def document(raw_text: str, structured_fields: dict | None = None) -> dict:
 
     structured_fields: optional dict with keys: when, where, witnesses
     """
-    # Build structured fields block if provided
     fields_block = ""
     if structured_fields:
         lines = []
@@ -90,7 +120,6 @@ def document(raw_text: str, structured_fields: dict | None = None) -> dict:
 
     user_message = _USER_TEMPLATE.format(raw_text=raw_text, structured_fields=fields_block)
 
-    # BedrockError propagates unchanged — caller handles it
     response_text = invoke(SYSTEM_PROMPT, user_message)
 
     try:
