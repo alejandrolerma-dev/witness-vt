@@ -18,12 +18,12 @@ REQUIRED_FIELDS = {"matched_policy", "policy_ambiguous", "rights_summary", "vt_c
 
 _POLICY_CONTACTS = {
     "Bias Response Team": {
-        "office": "Virginia Tech Bias Response Team",
-        "url": "https://www.inclusive.vt.edu/resources/brt.html",
+        "office": "VT Office for Civil Rights Compliance (CRCPE)",
+        "url": "https://oea.vt.edu/harassment-discrimination.html",
     },
     "Title IX": {
-        "office": "Virginia Tech Title IX Office",
-        "url": "https://titleix.vt.edu",
+        "office": "Virginia Tech Title IX / Safe at VT",
+        "url": "https://safe.vt.edu",
     },
     "Honor Code": {
         "office": "Virginia Tech Office of Academic Integrity",

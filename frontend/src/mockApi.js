@@ -33,15 +33,15 @@ export async function processIncident(rawText, structuredFields) {
       rights_summary:
         "As a Virginia Tech student, you have the right to report this incident to the Bias Response Team without fear of retaliation. The team will review your report confidentially and connect you with appropriate support resources. You may also choose to pursue a formal complaint through the Office for Equity and Accessibility. You are not required to identify yourself in your initial report.",
       vt_contact: {
-        office: "Virginia Tech Bias Response Team",
-        url: "https://www.inclusive.vt.edu/resources/brt.html",
+        office: "VT Office for Civil Rights Compliance (CRCPE)",
+        url: "https://oea.vt.edu/harassment-discrimination.html",
       },
     },
     navigation: {
       reporting_steps: [
         {
           step_number: 1,
-          action: "Submit an online report to the Bias Response Team at inclusive.vt.edu/resources/brt.html",
+          action: "Submit an online report to VT Civil Rights Compliance at oea.vt.edu/harassment-discrimination.html",
           estimated_timeline: "Can be done immediately, 24/7",
         },
         {
