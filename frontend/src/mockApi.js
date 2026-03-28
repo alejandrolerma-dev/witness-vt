@@ -359,23 +359,49 @@ export async function getStats() {
 
 // --- Analytics data (computed from anonymous aggregates — no PII) ---
 
-// Known VT campus locations → coordinates for the heatmap
-const LOCATION_COORDS = {
-  "torgersen hall":         { lat: 37.2296, lng: -80.4236 },
-  "newman library":         { lat: 37.2292, lng: -80.4186 },
-  "squires student center": { lat: 37.2291, lng: -80.4210 },
-  "goodwin hall":           { lat: 37.2304, lng: -80.4198 },
-  "mcbryde hall":           { lat: 37.2285, lng: -80.4245 },
-  "drill field":            { lat: 37.2278, lng: -80.4250 },
-  "dietrick":               { lat: 37.2275, lng: -80.4220 },
-  "d2":                     { lat: 37.2275, lng: -80.4220 },
-  "owens":                  { lat: 37.2265, lng: -80.4205 },
+// Known VT campus locations → verified coordinates from campus-maps.com
+const LOCATION_COORDS_MAP = {
+  "torgersen":              { lat: 37.229750, lng: -80.420201 },
+  "newman":                 { lat: 37.228934, lng: -80.419214 },
+  "library":                { lat: 37.228934, lng: -80.419214 },
+  "squires":                { lat: 37.229555, lng: -80.418018 },
+  "student center":         { lat: 37.229555, lng: -80.418018 },
+  "goodwin":                { lat: 37.231016, lng: -80.424402 },
+  "mcbryde":                { lat: 37.230527, lng: -80.421695 },
+  "burruss":                { lat: 37.229053, lng: -80.423766 },
+  "norris":                 { lat: 37.229705, lng: -80.423364 },
+  "drill field":            { lat: 37.227500, lng: -80.422000 },
+  "drillfield":             { lat: 37.227500, lng: -80.422000 },
+  "dietrick":               { lat: 37.224545, lng: -80.421081 },
+  "d2":                     { lat: 37.224545, lng: -80.421081 },
+  "dining":                 { lat: 37.224545, lng: -80.421081 },
+  "owens":                  { lat: 37.226621, lng: -80.418954 },
+  "derring":                { lat: 37.228996, lng: -80.425619 },
+  "randolph":               { lat: 37.230719, lng: -80.423192 },
+  "whittemore":             { lat: 37.231016, lng: -80.424402 },
+  "hahn":                   { lat: 37.228445, lng: -80.426381 },
+  "lavery":                 { lat: 37.231215, lng: -80.422822 },
+  "davidson":               { lat: 37.226858, lng: -80.424973 },
+  "robeson":                { lat: 37.228150, lng: -80.425169 },
+  "hancock":                { lat: 37.230386, lng: -80.424461 },
+  "henderson":              { lat: 37.230348, lng: -80.416905 },
+  "pamplin":                { lat: 37.228671, lng: -80.424670 },
+  "war memorial":           { lat: 37.226354, lng: -80.420636 },
+  "cassell":                { lat: 37.222591, lng: -80.418962 },
+  "ambler johnston":        { lat: 37.223129, lng: -80.420917 },
+  "slusher":                { lat: 37.225243, lng: -80.421668 },
+  "pritchard":              { lat: 37.224201, lng: -80.419440 },
+  "eggleston":              { lat: 37.227420, lng: -80.420091 },
+  "dorm":                   { lat: 37.223129, lng: -80.420917 },
+  "residence":              { lat: 37.223129, lng: -80.420917 },
+  "campus":                 { lat: 37.228000, lng: -80.422000 },
+  "parking":                { lat: 37.219660, lng: -80.413788 },
 };
 
 function _matchLocation(locStr) {
   if (!locStr || locStr === 'Not specified') return null;
   const lower = locStr.toLowerCase();
-  for (const [name, coords] of Object.entries(LOCATION_COORDS)) {
+  for (const [name, coords] of Object.entries(LOCATION_COORDS_MAP)) {
     if (lower.includes(name)) return { location: locStr, ...coords };
   }
   return { location: locStr, lat: null, lng: null };
