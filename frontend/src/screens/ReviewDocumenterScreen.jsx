@@ -20,8 +20,7 @@ export default function ReviewDocumenterScreen({ incidentRecord, onContinue, onB
 
         {/* Header */}
         <div>
-          <BackButton onBack={onBack} label="Edit my description" />
-          <div className="flex items-start justify-between mt-4">
+          <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center">
@@ -64,13 +63,24 @@ export default function ReviewDocumenterScreen({ incidentRecord, onContinue, onB
           })}
         </div>
 
-        <button
-          onClick={onContinue}
-          className="w-full py-4 rounded-2xl text-sm font-semibold text-white transition-all"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-        >
-          This looks right — continue
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={onBack}
+            className="flex items-center justify-center gap-2 py-4 px-5 rounded-2xl text-sm font-semibold text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-all"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Back
+          </button>
+          <button
+            onClick={onContinue}
+            className="flex-1 py-4 rounded-2xl text-sm font-semibold text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          >
+            This looks right — continue
+          </button>
+        </div>
       </div>
     </ScreenLayout>
   );
