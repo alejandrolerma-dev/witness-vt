@@ -1,162 +1,252 @@
 {
+  "_notes": "Training examples for the Documenter agent. Based on Clery Act reporting standards, ATIXA guidelines, and Virginia Tech CRCPE policy. Severity reflects real-world campus incident classification used by university bias response teams.",
+
   "severity_guidelines": {
     "high": [
-      "Physical contact or assault",
-      "Direct threats or intimidation",
-      "Repeated or ongoing harassment",
-      "Stalking behavior",
-      "Property damage or vandalism",
-      "Public targeting with personal information",
-      "Creates immediate safety concerns",
-      "Interference with disability accommodations"
+      "Physical assault, unwanted physical contact, or blocking movement",
+      "Direct verbal or written threats — 'leave campus', 'you'll regret this', 'I know where you live'",
+      "Repeated or ongoing harassment (second or third incident mentioned)",
+      "Stalking behavior — following, monitoring schedule, repeated unwanted contact",
+      "Property theft or vandalism — stealing belongings, damaging property, hiding disability equipment",
+      "Public targeting with personal information — photo used, name posted, identity exposed",
+      "Hate symbols or slurs directed at a person's residence (dorm door, car, locker)",
+      "Online identity theft or impersonation",
+      "Any incident creating immediate safety concern or fear for physical safety",
+      "Interference with disability accommodations (wheelchair, hearing aids, etc.)"
     ],
     "medium": [
-      "Verbal harassment from authority figures (professors, TAs)",
-      "Exclusion from academic activities",
-      "Hostile environment in academic or professional context",
-      "Dismissal of concerns when raised",
-      "Pattern of microaggressions",
-      "Affects academic performance or access"
+      "Verbal harassment or slurs directed at the student in person",
+      "Discriminatory statements from authority figures (professors, TAs, advisors, RAs)",
+      "Exclusion from academic activities, study groups, or lab partnerships based on identity",
+      "Hostile environment in academic or professional setting affecting participation",
+      "Dismissal or retaliation when concerns are raised",
+      "Pattern of microaggressions from the same person or group",
+      "Online harassment not involving threats or identity theft",
+      "Discriminatory grading, assignment, or academic treatment",
+      "Bias incident witnessed by others who did not intervene (especially authority figures)"
     ],
     "low": [
-      "Single instance of insensitive comment",
+      "Single overheard comment not directed at the student",
       "Appears unintentional or ignorant rather than malicious",
-      "Overheard rather than directed at the student",
-      "No pattern of behavior",
-      "No authority figure involved",
-      "Minimal impact on safety or academics"
+      "Casual insensitive remark with no pattern of behavior",
+      "No authority figure involved, no academic impact",
+      "Student is uncertain whether bias was the motivation",
+      "Minimal or no impact on safety, academics, or daily life"
     ]
   },
+
+  "critical_rules": [
+    "Property theft or damage is ALWAYS at least medium severity — it is a Clery Act reportable crime",
+    "If the theft or damage appears bias-motivated (slur left behind, targeting based on identity), it is HIGH",
+    "If the theft has no clear bias motivation stated, classify as medium and bias_category as 'other'",
+    "Never classify theft, vandalism, or property damage as LOW",
+    "Repeated incidents are always one level higher than a single incident would be",
+    "Threats — even vague ones — are always HIGH",
+    "Physical contact of any kind is always HIGH"
+  ],
+
   "incident_type_guidelines": {
-    "verbal": "Spoken comments, jokes, slurs, or statements made in person or over audio/video",
-    "physical": "Any unwanted physical contact, assault, blocking movement, or physical intimidation",
-    "written": "Notes, letters, flyers, posters, or other physical written materials",
-    "online": "Social media, messaging apps, email, forums, or any digital communication",
-    "property": "Vandalism, theft, damage to belongings, or interference with personal property",
-    "other": "Incidents that do not fit the above categories or involve multiple types"
+    "verbal": "Spoken comments, jokes, slurs, or statements made in person or over audio/video call",
+    "physical": "Any unwanted physical contact, assault, blocking movement, shoving, or physical intimidation",
+    "written": "Notes, letters, flyers, posters, graffiti, or other physical written materials",
+    "online": "Social media posts, messaging apps, email, forums, group chats, or any digital communication",
+    "property": "Vandalism, theft, damage to belongings, hiding or tampering with personal property",
+    "other": "Incidents that do not fit the above categories or clearly involve multiple types"
   },
+
   "bias_category_guidelines": {
     "race": "Based on racial identity, skin color, or racial stereotypes",
     "ethnicity": "Based on ethnic background, cultural identity, or ethnic stereotypes",
-    "religion": "Based on religious beliefs, practices, or religious identity",
+    "religion": "Based on religious beliefs, practices, symbols, or religious identity",
     "gender": "Based on gender identity, gender expression, or gender stereotypes",
     "sexual_orientation": "Based on sexual orientation or perceived sexual orientation",
     "disability": "Based on physical or mental disability, accommodation needs, or disability status",
     "national_origin": "Based on country of origin, citizenship status, accent, or nationality",
-    "other": "Based on other protected characteristics or multiple categories"
+    "other": "Incident does not clearly fit a protected category, or involves general theft/property crime without stated bias motivation"
   },
+
   "examples": [
+    {
+      "raw_text": "Someone stole my laptop from the library.",
+      "incident_type": "property",
+      "bias_category": "other",
+      "severity_indicator": "medium",
+      "reasoning": "Theft of personal property is a Clery Act reportable crime — always at least medium. No bias motivation stated, so bias_category is other."
+    },
+    {
+      "raw_text": "Someone stole my laptop and left a note with a racial slur on my desk.",
+      "incident_type": "property",
+      "bias_category": "race",
+      "severity_indicator": "high",
+      "reasoning": "Bias-motivated theft with written slur — property crime combined with targeted racial harassment."
+    },
+    {
+      "raw_text": "My backpack was stolen from my dorm room. I think someone broke in.",
+      "incident_type": "property",
+      "bias_category": "other",
+      "severity_indicator": "high",
+      "reasoning": "Theft from personal residence (dorm) with possible break-in creates immediate safety concern — high severity."
+    },
     {
       "raw_text": "Someone in my class made racist jokes about my ethnicity during a group discussion. The professor heard it but didn't say anything.",
       "incident_type": "verbal",
       "bias_category": "race",
       "severity_indicator": "medium",
-      "reasoning": "Verbal harassment in academic setting with authority figure present but not intervening — medium because no direct threat or physical contact"
+      "reasoning": "Verbal harassment in academic setting with authority figure present but not intervening. No direct threat or physical contact."
     },
     {
-      "raw_text": "A student pushed me and called me a slur related to my sexual orientation. This happened in the parking lot after class.",
+      "raw_text": "A student pushed me and called me a slur related to my sexual orientation in the parking lot after class.",
       "incident_type": "physical",
       "bias_category": "sexual_orientation",
       "severity_indicator": "high",
-      "reasoning": "Physical contact combined with verbal slur constitutes assault"
+      "reasoning": "Physical contact combined with verbal slur — constitutes assault."
     },
     {
       "raw_text": "I found graffiti with anti-Semitic symbols on my dorm room door. This is the second time this month.",
       "incident_type": "property",
       "bias_category": "religion",
       "severity_indicator": "high",
-      "reasoning": "Repeated targeting of personal space with hate symbols creates unsafe environment"
+      "reasoning": "Repeated targeting of personal residence with hate symbols — creates unsafe environment and is a pattern."
     },
     {
       "raw_text": "Someone created a fake social media account using my photo and posted Islamophobic content pretending to be me.",
       "incident_type": "online",
       "bias_category": "religion",
       "severity_indicator": "high",
-      "reasoning": "Identity theft combined with religious harassment, potential reputational damage"
+      "reasoning": "Identity theft combined with religious harassment — potential reputational damage and public targeting."
     },
     {
       "raw_text": "A TA made a comment suggesting students with disabilities shouldn't be in advanced courses. I have a documented disability.",
       "incident_type": "verbal",
       "bias_category": "disability",
       "severity_indicator": "medium",
-      "reasoning": "Discriminatory statement from authority figure, but not a direct threat"
+      "reasoning": "Discriminatory statement from authority figure affecting academic environment, but no direct threat."
     },
     {
       "raw_text": "I overheard classmates making jokes about my accent and imitating the way I speak. They didn't know I could hear them.",
       "incident_type": "verbal",
       "bias_category": "national_origin",
       "severity_indicator": "low",
-      "reasoning": "Offensive but not directly confrontational, overheard rather than directed, no authority figure involved"
+      "reasoning": "Overheard rather than directed at student, appears unintentional, single instance, no authority figure."
     },
     {
-      "raw_text": "Someone spray-painted a homophobic slur on my car in the campus parking lot. I have photos of the damage.",
+      "raw_text": "Someone spray-painted a homophobic slur on my car in the campus parking lot. I have photos.",
       "incident_type": "property",
       "bias_category": "sexual_orientation",
       "severity_indicator": "high",
-      "reasoning": "Vandalism of personal property with hate speech, criminal damage"
+      "reasoning": "Vandalism of personal property with hate speech — criminal damage, bias-motivated."
     },
     {
       "raw_text": "A group chat for my major has been sharing memes that mock women in STEM. When I said it made me uncomfortable, they told me to leave if I can't take a joke.",
       "incident_type": "online",
       "bias_category": "gender",
       "severity_indicator": "medium",
-      "reasoning": "Hostile environment in academic context, dismissal of concerns when raised"
+      "reasoning": "Hostile academic environment, dismissal of concerns when raised — affects participation in major."
     },
     {
-      "raw_text": "During a presentation, another student made a comment implying that people from my country are terrorists. The whole class heard it.",
+      "raw_text": "During a presentation, another student implied people from my country are terrorists. The whole class heard it.",
       "incident_type": "verbal",
       "bias_category": "national_origin",
       "severity_indicator": "high",
-      "reasoning": "Public accusation of terrorism based on national origin in academic setting"
+      "reasoning": "Public accusation of terrorism based on national origin in academic setting — creates hostile environment."
     },
     {
       "raw_text": "I received an anonymous note under my door with a racial slur and a threat saying I should leave campus.",
       "incident_type": "written",
       "bias_category": "race",
       "severity_indicator": "high",
-      "reasoning": "Written threat combined with racial slur, direct intimidation at residence"
+      "reasoning": "Written threat combined with racial slur, direct intimidation at residence."
     },
     {
       "raw_text": "My lab partner refuses to work with me and told others it's because of my gender identity. Now no one wants to partner with me.",
       "incident_type": "verbal",
       "bias_category": "gender",
       "severity_indicator": "medium",
-      "reasoning": "Exclusion from academic activities based on gender identity, affecting coursework"
+      "reasoning": "Exclusion from academic activities based on gender identity — affects coursework and academic access."
     },
     {
       "raw_text": "Someone keeps moving my wheelchair when I leave it outside the classroom. Yesterday they hid it in a different building.",
       "incident_type": "property",
       "bias_category": "disability",
       "severity_indicator": "high",
-      "reasoning": "Repeated interference with disability accommodation equipment, creates safety risk"
+      "reasoning": "Repeated interference with disability accommodation equipment — creates safety risk and is ongoing."
     },
     {
-      "raw_text": "A student made an offhand comment about my religion during a casual conversation. It was ignorant but didn't seem intentionally mean.",
+      "raw_text": "A student made an offhand comment about my religion during a casual conversation. It seemed ignorant but not intentionally mean.",
       "incident_type": "verbal",
       "bias_category": "religion",
       "severity_indicator": "low",
-      "reasoning": "Single instance, appears unintentional, no pattern of behavior"
+      "reasoning": "Single instance, appears unintentional, no pattern, no academic impact."
     },
     {
       "raw_text": "I've been getting threatening DMs on Instagram from someone who knows my class schedule. They've made comments about my race and said they're watching me.",
       "incident_type": "online",
       "bias_category": "race",
       "severity_indicator": "high",
-      "reasoning": "Stalking behavior combined with racial harassment and direct threats"
+      "reasoning": "Stalking behavior combined with racial harassment and direct threats — immediate safety concern."
     },
     {
       "raw_text": "During a debate in class, a student said women are naturally worse at logic. The professor didn't correct them.",
       "incident_type": "verbal",
       "bias_category": "gender",
       "severity_indicator": "low",
-      "reasoning": "Biased statement in academic debate context, not targeted at a specific individual"
+      "reasoning": "Biased statement in academic debate context, not targeted at a specific individual."
     },
     {
-      "raw_text": "Someone posted flyers around campus with hateful rhetoric about immigrants. My photo from the student directory was included on one of them.",
+      "raw_text": "Someone posted flyers around campus with hateful rhetoric about immigrants. My photo from the student directory was included.",
       "incident_type": "written",
       "bias_category": "national_origin",
       "severity_indicator": "high",
-      "reasoning": "Public targeting with personal photo, widespread distribution, creates hostile environment"
+      "reasoning": "Public targeting with personal photo, widespread distribution — creates hostile environment."
+    },
+    {
+      "raw_text": "My professor keeps mispronouncing my name even after I've corrected them multiple times and makes jokes about it in class.",
+      "incident_type": "verbal",
+      "bias_category": "ethnicity",
+      "severity_indicator": "medium",
+      "reasoning": "Repeated behavior from authority figure in academic setting — pattern of microaggressions affecting class experience."
+    },
+    {
+      "raw_text": "Someone slipped a note under my dorm door saying they know I'm gay and that I should watch my back.",
+      "incident_type": "written",
+      "bias_category": "sexual_orientation",
+      "severity_indicator": "high",
+      "reasoning": "Written threat at personal residence based on sexual orientation — direct intimidation and safety concern."
+    },
+    {
+      "raw_text": "A classmate told me my religious headwear is 'unprofessional' during a group project meeting.",
+      "incident_type": "verbal",
+      "bias_category": "religion",
+      "severity_indicator": "medium",
+      "reasoning": "Discriminatory comment about religious expression in academic context — affects participation."
+    },
+    {
+      "raw_text": "Someone vandalized my car with a swastika in the campus parking garage.",
+      "incident_type": "property",
+      "bias_category": "religion",
+      "severity_indicator": "high",
+      "reasoning": "Hate symbol vandalism on personal property — bias-motivated property crime."
+    },
+    {
+      "raw_text": "I was told by my advisor that students from my country 'usually struggle' with the program and suggested I consider a different major.",
+      "incident_type": "verbal",
+      "bias_category": "national_origin",
+      "severity_indicator": "medium",
+      "reasoning": "Discriminatory academic guidance from authority figure — affects academic trajectory and access."
+    },
+    {
+      "raw_text": "Someone stole my phone from my backpack in class.",
+      "incident_type": "property",
+      "bias_category": "other",
+      "severity_indicator": "medium",
+      "reasoning": "Theft of personal property is always at least medium (Clery Act reportable). No bias motivation stated."
+    },
+    {
+      "raw_text": "My roommate has been making comments about my race and refuses to be in the room when I'm there. I've had to sleep in the common area.",
+      "incident_type": "verbal",
+      "bias_category": "race",
+      "severity_indicator": "high",
+      "reasoning": "Ongoing racial harassment affecting housing and basic living conditions — repeated pattern with direct impact on safety and wellbeing."
     }
   ]
 }

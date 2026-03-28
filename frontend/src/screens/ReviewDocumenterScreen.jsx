@@ -8,6 +8,15 @@ const SEVERITY_STYLES = {
   low:    { pill: 'bg-green-50 text-green-700 border-green-100', label: '✓ Low' },
 };
 
+// Capitalize and humanize enum values from the AI (e.g. "national_origin" → "National Origin")
+function formatValue(val) {
+  if (!val || val === 'Not specified') return val ?? '—';
+  return val
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 const STATIC_FIELDS = [
   { key: 'incident_type',    label: 'Type of incident',   icon: '📌' },
   { key: 'date_context',     label: 'When it happened',   icon: '📅' },
@@ -65,7 +74,7 @@ export default function ReviewDocumenterScreen({ incidentRecord, onContinue, onB
                     {severityStyle.label}
                   </span>
                 ) : (
-                  <p className="text-sm text-slate-700 leading-relaxed">{value ?? '—'}</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{formatValue(value)}</p>
                 )}
               </div>
             );

@@ -39,15 +39,22 @@ def _load_examples() -> str:
 
         lines = ["CLASSIFICATION GUIDELINES:", ""]
 
+        # Critical rules first
+        if data.get("critical_rules"):
+            lines.append("CRITICAL RULES (always apply these):")
+            for rule in data["critical_rules"]:
+                lines.append(f"  - {rule}")
+            lines.append("")
+
         # Severity guidelines
         lines.append("Severity levels:")
         for level, criteria in data["severity_guidelines"].items():
-            lines.append(f"  {level.upper()}: " + "; ".join(criteria[:3]))  # top 3 criteria
+            lines.append(f"  {level.upper()}: " + "; ".join(criteria[:3]))
         lines.append("")
 
-        # Few-shot examples (use first 6 to keep token count reasonable)
-        lines.append("EXAMPLES (use these to calibrate your classifications):")
-        for ex in data["examples"][:6]:
+        # Few-shot examples (first 8 for better coverage)
+        lines.append("EXAMPLES (calibrate your classifications against these):")
+        for ex in data["examples"][:8]:
             lines.append(f'Input: "{ex["raw_text"]}"')
             lines.append(f'→ incident_type: {ex["incident_type"]}, bias_category: {ex["bias_category"]}, severity_indicator: {ex["severity_indicator"]}')
             lines.append(f'  Reason: {ex["reasoning"]}')
@@ -55,7 +62,7 @@ def _load_examples() -> str:
 
         return "\n".join(lines)
     except Exception:
-        return ""  # fail silently — prompt still works without examples
+        return ""
 
 
 _FEW_SHOT_CONTEXT = _load_examples()
