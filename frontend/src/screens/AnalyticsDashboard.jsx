@@ -127,20 +127,37 @@ const LOCATION_COORDS = {
   'torgersen':              [37.22965, -80.42040],
   'newman library':         [37.22925, -80.41860],
   'newman':                 [37.22925, -80.41860],
+  'library':                [37.22925, -80.41860],
   'squires student center': [37.22720, -80.42100],
   'squires':                [37.22720, -80.42100],
+  'student center':         [37.22720, -80.42100],
   'goodwin hall':           [37.23040, -80.41980],
   'goodwin':                [37.23040, -80.41980],
   'mcbryde hall':           [37.22850, -80.42450],
   'mcbryde':                [37.22850, -80.42450],
   'drill field':            [37.22780, -80.42250],
+  'drillfield':             [37.22780, -80.42250],
   'dietrick':               [37.22460, -80.42200],
   'd2':                     [37.22460, -80.42200],
+  'dining':                 [37.22460, -80.42200],
   'owens':                  [37.22500, -80.41900],
   'burruss':                [37.22870, -80.42330],
   'norris':                 [37.22920, -80.42520],
-  'residence halls':        [37.23100, -80.41950],
+  'residence hall':         [37.23100, -80.41950],
+  'dorm':                   [37.23100, -80.41950],
   'war memorial':           [37.23050, -80.42280],
+  'war memorial hall':      [37.23050, -80.42280],
+  'hahn':                   [37.23000, -80.42450],
+  'lavery':                 [37.22700, -80.42350],
+  'randolph':               [37.22800, -80.42150],
+  'whittemore':             [37.23020, -80.42080],
+  'hancock':                [37.22950, -80.42350],
+  'davidson':               [37.22650, -80.42200],
+  'derring':                [37.22850, -80.42200],
+  'robeson':                [37.22700, -80.42000],
+  'campus':                 [37.22840, -80.42200],
+  'parking lot':            [37.22600, -80.42400],
+  'parking garage':         [37.22600, -80.42000],
 };
 
 function matchCoords(locStr) {
@@ -153,11 +170,9 @@ function matchCoords(locStr) {
 }
 
 function CampusHeatmap({ locations }) {
-  const mapped = locations
+  const mapped = (locations || [])
     .map(l => ({ ...l, coords: matchCoords(l.location) }))
     .filter(l => l.coords);
-
-  if (mapped.length === 0) return null;
 
   const maxCount = Math.max(...mapped.map(l => l.count), 1);
 
@@ -296,13 +311,11 @@ export default function AnalyticsDashboard({ onBack }) {
               </div>
             )}
 
-            {/* Campus heatmap */}
-            {data.by_location.some(l => l.lat) && (
-              <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Campus hotspots</p>
-                <CampusHeatmap locations={data.by_location} />
-              </div>
-            )}
+            {/* Campus heatmap — always shown */}
+            <div className="bg-white rounded-3xl shadow-card p-5 flex flex-col gap-4">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Campus hotspots</p>
+              <CampusHeatmap locations={data.by_location} />
+            </div>
 
             {/* Trend over time */}
             {data.by_month.length > 1 && (
