@@ -80,8 +80,9 @@ function detectBiasCategory(text) {
   return score(text, BIAS_SIGNALS) || "other";
 }
 
-function detectSeverity(text) {
+function detectSeverity(text, incidentType) {
   const t = text.toLowerCase();
+  if (incidentType === "physical") return "high";
   const high = SEVERITY_SIGNALS.high.filter(p => p.test(t)).length;
   const medium = SEVERITY_SIGNALS.medium.filter(p => p.test(t)).length;
   if (high >= 1) return "high";
@@ -421,7 +422,7 @@ export async function processIncident(rawText, structuredFields) {
   const locationContext = structuredFields?.where || extractLocationContext(rawText);
   const incidentType = detectIncidentType(rawText);
   const biasCategory = detectBiasCategory(rawText);
-  const severity = detectSeverity(rawText);
+  const severity = detectSeverity(rawText, incidentType);
   const summary = buildSummary(rawText, incidentType, biasCategory, severity);
 
   const result = {
