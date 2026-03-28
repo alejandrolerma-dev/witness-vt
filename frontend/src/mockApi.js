@@ -15,7 +15,7 @@ export async function createSession() {
 // --- NLP helpers ---
 
 const INCIDENT_SIGNALS = {
-  physical:  [/assault/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /grab/, /chok/, /attack/, /physical/, /threw/, /spit/, /block/, /beat/, /corner/, /\brape/, /molest/, /grope/, /fondl/, /forced/, /non.?consensual/],
+  physical:  [/assault/, /\bhit\b/, /punch/, /push/, /shov/, /kick/, /grab/, /chok/, /attack/, /physical/, /threw/, /spit/, /block/, /beat/, /corner/, /\brape/, /molest/, /grope/, /fondl/, /forced/, /sexual/, /non.?consensual/],
   online:    [/post/, /tweet/, /messag/, /\bemail\b/, /online/, /social media/, /instagram/, /facebook/, /\bdm\b/, /discord/, /snapchat/, /tiktok/, /comment/, /tagged/],
   written:   [/\bnote\b/, /\bsign\b/, /written/, /graffiti/, /letter/, /flyer/, /poster/, /whiteboard/, /chalk/],
   property:  [/damage/, /vandal/, /destroy/, /broke/, /stolen/, /stole/, /took my/, /keyed/, /slashed/, /property/],
